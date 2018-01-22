@@ -2,7 +2,7 @@
 
 dir=/root/wu
 pws=$dir/pws_list.txt
-wukkey=`head wu.key`
+wukkey=`head $dir/wu.key`
 
 printf "key : %s\n" $wukkey
 #for i in ${pws[@]}; do
