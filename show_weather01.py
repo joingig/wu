@@ -14,13 +14,13 @@ Options:
 
 _debug_ = False 
 wuhome = "/root/wu"
-settings = {'cpws':['ISVIBLOV2'],
+settings = {'cpws':['I1722'],
             'hourly_h':0,
             'fname':"wu.pck",
             'pwsfile':"pws_list.txt"
 }
 settings_fname = "wu.pck"
-pws=["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870","I2310","I1722","IMOSCOW260"]
+pws=["I2310","I1722","IMOSCOW260"]
 
 import urllib2
 import json
