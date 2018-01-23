@@ -14,13 +14,13 @@ Options:
 
 _debug_ = False 
 wuhome = "/root/wu"
-settings = {'cpws':['I1722'],
+settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
             'pwsfile':"pws_list.txt"
 }
 settings_fname = "wu.pck"
-pws=["I2310","I1722","IMOSCOW260"]
+pws=["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870","I2310","I1722","IMOSCOW260"]
 
 import urllib2
 import json
@@ -60,7 +60,7 @@ if not _debug_:
 	font_ttf40 = ImageFont.truetype(wuhome + "/fonts/Volter__28Goldfish_29.ttf",35)
 	#device.contrast(220)
 
-arguments = docopt(__doc__, version='0.2')
+arguments = docopt(__doc__, version='0.3')
 #print(arguments)
 print "[*] Startup ok"
 #sys.exit(0)
@@ -111,7 +111,7 @@ except IOError as e:
         print "[*] creating {0}".format(settings_fname)
         pickle.dump( settings, open( settings_fname, "wb" ))
 
-cpws = settings['cpws'][0]
+cpws = settings['cpws']
 
 if arguments['pwswitch']:
         print "[*] pws switch mode"
@@ -122,8 +122,8 @@ if arguments['pwswitch']:
             idx+=1
         else:
             idx=0
-        settings['cpws'][0]=pws[idx] #save new pws
-        cpws = pws[idx] # renew cur pws with new value
+        cpws = settings['cpws'] = pws[idx] #save new pws
+       # cpws = pws[idx] # renew cur pws with new value
         print "[*] idx is {0} and new cpws is {1}".format(idx,cpws)
 
 print "[*] PWS: " + cpws
@@ -139,14 +139,12 @@ except ValueError as e:
 #  print "[**] Error load JSON object. Exiting."
   time_and_exit("[**] Error load JSON object. Exiting.") 
 
-
-  
 location = parsed_json['location']['city']
 
 if arguments['hourly']:
         print "[*] hourly mode"
         NextH = settings['hourly_h']
-        print "[*] nexth is %s " % (NextH)
+        print "[*] NextH is %s" % (NextH)
 
         temp_c = parsed_json['hourly_forecast'][NextH]['temp']['metric']
         feelslike_c = parsed_json['hourly_forecast'][NextH]['feelslike']['metric']
@@ -155,11 +153,11 @@ if arguments['hourly']:
         hours = parsed_json['hourly_forecast'][NextH]['FCTTIME']['hour']
         minutes = parsed_json['hourly_forecast'][NextH]['FCTTIME']['min']
 
-        if arguments['--prev'] and NextH > 0:
-            NextH -=1
+        if arguments['--prev'] and NextH > 1:
+            NextH -=2
         else:
-            NextH+=1
-            if NextH == 35:
+            NextH+=2
+            if NextH == 34:
                 NextH = 0
 
         settings['hourly_h']=NextH
