@@ -1,5 +1,5 @@
-# RPi weather station
-## application part on python
+## RPi weather station
+### application part on python
 
 
 SSD1306 driven with [LUMA](https://github.com/rm-hull/luma.oled) library
