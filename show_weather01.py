@@ -32,7 +32,7 @@ from os import getcwd, chdir, path
 from docopt import docopt
 
 if not _debug_:
-	from luma.core.serial import i2c, spi
+	from luma.core.serial import i2c
 	from luma.core.render import canvas
 	from luma.oled.device import ssd1306
 	from PIL import ImageFont, Image
