@@ -60,7 +60,7 @@ if not _debug_:
 	font_ttf40 = ImageFont.truetype(wuhome + "/fonts/Volter__28Goldfish_29.ttf",35)
 	#device.contrast(220)
 
-arguments = docopt(__doc__, version='0.2')
+arguments = docopt(__doc__, version='0.3')
 #print(arguments)
 print "[*] Startup ok"
 #sys.exit(0)
