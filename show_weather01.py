@@ -12,8 +12,10 @@ Options:
   --prev                   show prev hour from "36 hours" weather report
 """
 
-_debug_ = False 
+_debug_ = False
 wuhome = "/root/wu"
+#wuhome = "/home/tazz/wu"
+
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -56,8 +58,8 @@ if not _debug_:
 	serial = i2c(port=1, address=0x3C)
 	device = ssd1306(serial)
 	font = ImageFont.load_default()
-	font_ttf30 = ImageFont.truetype(wuhome + "/fonts/C&C Red Alert [INET].ttf",30 )
-	font_ttf40 = ImageFont.truetype(wuhome + "/fonts/Volter__28Goldfish_29.ttf",35)
+	font_ttf30 = ImageFont.truetype(wuhome + "/luma/examples/fonts/C&C Red Alert [INET].ttf",30 )
+	font_ttf40 = ImageFont.truetype(wuhome + "/luma/examples/fonts/Volter__28Goldfish_29.ttf",35)
 	#device.contrast(220)
 
 arguments = docopt(__doc__, version='0.3')
@@ -137,7 +139,7 @@ try:
                 pws_file.close()
 except ValueError as e:
 #  print "[**] Error load JSON object. Exiting."
-  time_and_exit("[**] Error load JSON object. Exiting.") 
+  time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']['city']
 
