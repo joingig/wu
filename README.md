@@ -1,8 +1,8 @@
-# RPi weather station
-## application part on python
+## RPi weather station
+### application part on python
+Forecast based on [Weather Underground](https://www.wunderground.com/weather/api/d/docs) API (PWS+location+hourly)
 
-
-SSD1306 driven with [LUMA](https://github.com/rm-hull/luma.oled) library
+SSD1306 driven with [LUMA](https://github.com/rm-hull/luma.oled) library with little modification (don't clear display after app close)
 
 
 
