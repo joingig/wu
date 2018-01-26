@@ -12,10 +12,9 @@ Options:
   --prev                   show prev hour from "36 hours" weather report
 """
 
-_debug_ = False
-wuhome = "/root/wu"
-#wuhome = "/home/tazz/wu"
-
+_debug_ = True
+#wuhome = "/root/wu"
+wuhome = "/home/tazz/wu"
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -48,11 +47,10 @@ def internet_on():
     return False
 
 def time_and_exit(mess):
-  	if not _debug_:
+    if not _debug_:
             with canvas(device) as draw:
                 draw.text((20, 15),hours+":"+minutes,font=font_ttf40, fill="gray")
-            sys.exit(mess)
-
+    sys.exit(mess)
 
 if not _debug_:
 	serial = i2c(port=1, address=0x3C)
@@ -130,16 +128,16 @@ if arguments['pwswitch']:
 
 print "[*] PWS: " + cpws
 if not _debug_:
-	with canvas(device) as draw:
-		draw.text((00, 20),cpws,font=font_ttf30, fill="gray")
+    with canvas(device) as draw:
+        draw.text((00, 20),cpws,font=font_ttf30, fill="gray")
         sleep(1);
 try:
-  with open(cpws+".json") as pws_file:
-                parsed_json = json.load(pws_file)
-                pws_file.close()
-except ValueError as e:
+    with open(cpws+".json") as pws_file:
+        parsed_json = json.load(pws_file)
+        pws_file.close()
+except (ValueError,IOError)as e:
 #  print "[**] Error load JSON object. Exiting."
-  time_and_exit("[**] Error load JSON object. Exiting.")
+    time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']['city']
 
