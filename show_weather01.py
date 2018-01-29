@@ -12,6 +12,8 @@ Options:
   --prev                   show prev hour from "36 hours" weather report
 """
 
+#maximum spaghetti code here
+
 _debug_ = True
 #wuhome = "/root/wu"
 wuhome = "/home/tazz/wu"
@@ -63,7 +65,6 @@ if not _debug_:
 arguments = docopt(__doc__, version='0.3')
 #print(arguments)
 print "[*] Startup ok"
-#sys.exit(0)
 
 time = localtime()
 
@@ -98,10 +99,30 @@ else:
 #            sys.exit("We are offline. Exiting.")
 
 pwd=getcwd()
-
 if pwd != wuhome:
         chdir(wuhome)
         print getcwd()
+
+#load pws_list
+try:
+    with open(settings['pwsfile']) as pws_list:
+        data = pws_list.read()
+        del pws[:]
+        pws_new = []
+        pws = data.split()
+        pws_list.close()
+        for pp in pws:
+            if pp[0] != "#":
+                print "{0} PWS OK".format(pp)
+                pws_new.append(pp)
+            else:
+                print "{0} PWS removed".format(pp)
+        if not pws_new:
+            print "[**] Error load PWS list. Check {0} file.".format(settings['pwsfile'])
+            #need workaround here for empty PWS list
+        pws = pws_new
+except (ValueError,IOError)as e:
+    time_and_exit("[**] Error load " + settings['pwsfile'] + " Exiting.")
 
 #load settings
 try:
@@ -109,6 +130,7 @@ try:
 except IOError as e:
         print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror,settings_fname)
         print "[*] creating {0}".format(settings_fname)
+        settings['cpws'] = pws[0]
         pickle.dump( settings, open( settings_fname, "wb" ))
 
 cpws = settings['cpws']
@@ -126,7 +148,7 @@ if arguments['pwswitch']:
        # cpws = pws[idx] # renew cur pws with new value
         print "[*] idx is {0} and new cpws is {1}".format(idx,cpws)
 
-print "[*] PWS: " + cpws
+print "[*] PWS: {0}".format( cpws )
 if not _debug_:
     with canvas(device) as draw:
         draw.text((00, 20),cpws,font=font_ttf30, fill="gray")
@@ -136,7 +158,6 @@ try:
         parsed_json = json.load(pws_file)
         pws_file.close()
 except (ValueError,IOError)as e:
-#  print "[**] Error load JSON object. Exiting."
     time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']['city']
@@ -182,7 +203,6 @@ if path.isfile(sky_img) is False:
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours,minutes,location,temp_c,sky,feelslike_c)
 #dump config data
 pickle.dump( settings, open( settings_fname, "wb" ))
-#sys.exit(0)
 
 if not _debug_:
         pic = Image.open(sky_img).convert("RGBA")
