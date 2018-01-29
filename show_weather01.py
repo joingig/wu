@@ -82,29 +82,20 @@ else:
 #if time.tm_hour > 0 and time.tm_hour < 6:
 if arguments['night']:
   time_and_exit("Deep night. Exiting.")
-#	if not _debug_:
-#            with canvas(device) as draw:
-#                draw.text((20, 15),hours+":"+minutes,font=font_ttf40, fill="gray")
-#            sys.exit("Deep night. Exiting.")
 
 if internet_on():
-    print "[*] Online"
+  print "[*] Online"
 else:
   time_and_exit("We are offline. Exiting.")
-#	if not _debug_:
-#            with canvas(device) as draw:
-#                draw.text((30, 20),hours+":"+minutes,font=font_ttf30, fill="gray")
-#            print hours+":"+minutes
-#            sys.exit("We are offline. Exiting.")
 
 pwd=getcwd()
 if pwd != wuhome:
-        chdir(wuhome)
-        print getcwd()
+  chdir(wuhome)
+  print getcwd()
 
 #load pws_list
 try:
-    with open(settings['pwsfile']) as pws_list:
+  with open(settings['pwsfile']) as pws_list:
         data = pws_list.read()
         del pws[:]
         pws_new = []
