@@ -25,41 +25,42 @@ settings = {'cpws':"ISVIBLOV2",
 settings_fname = "wu.pck"
 pws=["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870","I2310","I1722","IMOSCOW260"]
 
-import urllib2
+#import urllib2
 import json
 import sys
 import pickle
+from urllib2 import urlopen,URLError
 from urllib import urlretrieve
 from time import localtime, sleep
 from os import getcwd, chdir, path
 from docopt import docopt
 
 if not _debug_:
-	from luma.core.serial import i2c
-	from luma.core.render import canvas
-	from luma.oled.device import ssd1306
-	from PIL import ImageFont, Image
+    from luma.core.serial import i2c
+    from luma.core.render import canvas
+    from luma.oled.device import ssd1306
+    from PIL import ImageFont, Image
 
 def internet_on():
     try:
-        response=urllib2.urlopen('http://google.com',timeout=20)
+        response=urlopen('http://google.com',timeout=20)
         return True
-    except urllib2.URLError as err: pass
+    except URLError as err: pass
     return False
 
 def time_and_exit(mess):
     if not _debug_:
-            with canvas(device) as draw:
-                draw.text((20, 15),hours+":"+minutes,font=font_ttf40, fill="gray")
+        with canvas(device) as draw:
+            draw.text((20, 15),hours+":"+minutes,font=font_ttf40, fill="gray")
     sys.exit(mess)
 
 if not _debug_:
-	serial = i2c(port=1, address=0x3C)
-	device = ssd1306(serial)
-	font = ImageFont.load_default()
-	font_ttf30 = ImageFont.truetype(wuhome + "/luma/examples/fonts/C&C Red Alert [INET].ttf",30 )
-	font_ttf40 = ImageFont.truetype(wuhome + "/luma/examples/fonts/Volter__28Goldfish_29.ttf",35)
-	#device.contrast(220)
+    serial = i2c(port=1, address=0x3C)
+    device = ssd1306(serial)
+    font = ImageFont.load_default()
+    font_ttf30 = ImageFont.truetype(wuhome + "/luma/examples/fonts/C&C Red Alert [INET].ttf",30 )
+    font_ttf40 = ImageFont.truetype(wuhome + "/luma/examples/fonts/Volter__28Goldfish_29.ttf",35)
+    #device.contrast(220)
 
 arguments = docopt(__doc__, version='0.3')
 #print(arguments)
@@ -68,34 +69,34 @@ print "[*] Startup ok"
 time = localtime()
 
 if time.tm_hour < 10:
-	hours = "0" + str(time.tm_hour)
+    hours = "0" + str(time.tm_hour)
 else:
-	hours = str(time.tm_hour)
+    hours = str(time.tm_hour)
 
 if time.tm_min < 10:
-	minutes = "0" + str(time.tm_min)
+    minutes = "0" + str(time.tm_min)
 else:
-	minutes = str(time.tm_min)
+    minutes = str(time.tm_min)
 
 
 #night mode between 01 and 06 am / we not showing weather
 #if time.tm_hour > 0 and time.tm_hour < 6:
 if arguments['night']:
-  time_and_exit("Deep night. Exiting.")
+    time_and_exit("Deep night. Exiting.")
 
 if internet_on():
-  print "[*] Online"
+    print "[*] Online"
 else:
-  time_and_exit("We are offline. Exiting.")
+    time_and_exit("We are offline. Exiting.")
 
 pwd=getcwd()
 if pwd != wuhome:
-  chdir(wuhome)
-  print getcwd()
+    chdir(wuhome)
+    print getcwd()
 
 #load pws_list
 try:
-  with open(settings['pwsfile']) as pws_list:
+    with open(settings['pwsfile']) as pws_list:
         data = pws_list.read()
         del pws[:]
         pws_new = []
