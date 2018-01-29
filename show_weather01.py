@@ -12,6 +12,11 @@ Options:
   --prev                   show prev hour from "36 hours" weather report
 """
 
+
+
+
+#maximum spaghetti code here
+
 _debug_ = True
 #wuhome = "/root/wu"
 wuhome = "/home/tazz/wu"
@@ -97,7 +102,6 @@ else:
 #            sys.exit("We are offline. Exiting.")
 
 pwd=getcwd()
-
 if pwd != wuhome:
         chdir(wuhome)
         print getcwd()
@@ -154,7 +158,6 @@ try:
         parsed_json = json.load(pws_file)
         pws_file.close()
 except (ValueError,IOError)as e:
-#  print "[**] Error load JSON object. Exiting."
     time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']['city']
@@ -200,7 +203,6 @@ if path.isfile(sky_img) is False:
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours,minutes,location,temp_c,sky,feelslike_c)
 #dump config data
 pickle.dump( settings, open( settings_fname, "wb" ))
-#sys.exit(0)
 
 if not _debug_:
         pic = Image.open(sky_img).convert("RGBA")
