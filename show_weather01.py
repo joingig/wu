@@ -12,9 +12,6 @@ Options:
   --prev                   show prev hour from "36 hours" weather report
 """
 
-
-
-
 #maximum spaghetti code here
 
 _debug_ = True
