@@ -63,7 +63,6 @@ if not _debug_:
 arguments = docopt(__doc__, version='0.3')
 #print(arguments)
 print "[*] Startup ok"
-#sys.exit(0)
 
 time = localtime()
 
@@ -103,12 +102,31 @@ if pwd != wuhome:
         chdir(wuhome)
         print getcwd()
 
+#load pws_list
+try:
+    with open(settings['pwsfile']) as pws_list:
+        data = pws_list.read()
+        del pws[:]
+        pws_new = []
+        pws = data.split()
+        pws_list.close()
+        for pp in pws:
+            if pp[0] != "#":
+                print "{0} PWS OK".format(pp)
+                pws_new.append(pp)
+            else:
+                print "{0} PWS removed".format(pp)
+        pws = pws_new
+except (ValueError,IOError)as e:
+    time_and_exit("[**] Error load " + settings['pwsfile'] + " Exiting.")
+
 #load settings
 try:
         settings = pickle.load( open( settings_fname, "rb" ) )
 except IOError as e:
         print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror,settings_fname)
         print "[*] creating {0}".format(settings_fname)
+        settings['cpws'] = pws[0]
         pickle.dump( settings, open( settings_fname, "wb" ))
 
 cpws = settings['cpws']
