@@ -119,6 +119,7 @@ try:
                 print "{0} PWS removed".format(pp)
         if not pws_new:
             print "[**] Error load PWS list. Check {0} file.".format(settings['pwsfile'])
+            #need workaround here for empty PWS list
         pws = pws_new
 except (ValueError,IOError)as e:
     time_and_exit("[**] Error load " + settings['pwsfile'] + " Exiting.")
