@@ -148,7 +148,7 @@ if arguments['pwswitch']:
        # cpws = pws[idx] # renew cur pws with new value
         print "[*] idx is {0} and new cpws is {1}".format(idx,cpws)
 
-print "[*] PWS: " + cpws
+print "[*] PWS: {0}".format( cpws )
 if not _debug_:
     with canvas(device) as draw:
         draw.text((00, 20),cpws,font=font_ttf30, fill="gray")
