@@ -14,9 +14,9 @@ Options:
 
 #maximum spaghetti code here
 
-_debug_ = True
-#wuhome = "/root/wu"
-wuhome = "/home/tazz/wu"
+_debug_ = False 
+wuhome = "/root/wu"
+#wuhome = "/home/tazz/wu"
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -39,7 +39,6 @@ if not _debug_:
 	from luma.core.render import canvas
 	from luma.oled.device import ssd1306
 	from PIL import ImageFont, Image
-
 
 def internet_on():
     try:
@@ -149,6 +148,7 @@ if arguments['pwswitch']:
         print "[*] idx is {0} and new cpws is {1}".format(idx,cpws)
 
 print "[*] PWS: {0}".format( cpws )
+
 if not _debug_:
     with canvas(device) as draw:
         draw.text((00, 20),cpws,font=font_ttf30, fill="gray")
@@ -161,6 +161,7 @@ except (ValueError,IOError)as e:
     time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']['city']
+last_upd = parsed_json['current_observation']['observation_time']
 
 if arguments['hourly']:
         print "[*] hourly mode"
@@ -201,6 +202,7 @@ if path.isfile(sky_img) is False:
         urlretrieve(img, sky_img)
 
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours,minutes,location,temp_c,sky,feelslike_c)
+print "{0}".format(last_upd)
 #dump config data
 pickle.dump( settings, open( settings_fname, "wb" ))
 
