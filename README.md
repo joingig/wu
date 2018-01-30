@@ -10,7 +10,7 @@ Put yours [Weather Underground key api](https://www.wunderground.com/weather/api
 
 Add periodic task for PWS data refresh in you crontab as:
 ```sh
-0  *\30  *  *  *  root   /usr/bin/python /home/tazz/wu/[get_weather.sh](./get_weather.sh)
+0  *\30  *  *  *  root   /usr/bin/python /home/tazz/wu/get_weather.sh
 ```
 > Replace /home/tazz/wu/ with yours **wu** directory location.
 
