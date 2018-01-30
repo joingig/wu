@@ -12,7 +12,6 @@ add periodic task for PWS data refresh in you crontab as:
 0  *\30  *  *  *  root   /usr/bin/python /home/tazz/wu/get_weather.sh 
 ```
 > replace /home/tazz/wu/ with yours **wu** directory location
-
 > ***\30** mean every 30 minutes
 
 add periodic task for LCD refresh/update in you crontab as:
