@@ -14,9 +14,9 @@ Options:
 
 #maximum spaghetti code here
 
-_debug_ = True
-#wuhome = "/root/wu"
-wuhome = "/home/tazz/wu"
+_debug_ = False 
+wuhome = "/root/wu"
+#wuhome = "/home/tazz/wu"
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -129,21 +129,21 @@ if arguments['pwswitch']:
     print "[*] pws switch mode"
     le = len(pws)
     idx = pws.index(cpws)
-        print "[*] pws len is {0}, cpws is {1}, index in pws is {2}".format(le,cpws,idx)
-        if idx < le-1:
-            idx+=1
-        else:
-            idx=0
-        cpws = settings['cpws'] = pws[idx] #save new pws
-       # cpws = pws[idx] # renew cur pws with new value
-        print "[*] idx is {0} and new cpws is {1}".format(idx,cpws)
+    print "[*] pws len is {0}, cpws is {1}, index in pws is {2}".format(le,cpws,idx)
+    if idx < le-1:
+        idx+=1
+    else:
+        idx=0
+    cpws = settings['cpws'] = pws[idx] #save new pws
+    # cpws = pws[idx] # renew cur pws with new value
+    print "[*] idx is {0} and new cpws is {1}".format(idx,cpws)
 
 print "[*] PWS: {0}".format( cpws )
 
 if not _debug_:
     with canvas(device) as draw:
         draw.text((00, 20),cpws,font=font_ttf30, fill="gray")
-        sleep(1);
+    sleep(1);
 try:
     with open(cpws+".json") as pws_file:
         parsed_json = json.load(pws_file)
