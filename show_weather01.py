@@ -14,9 +14,9 @@ Options:
 
 #maximum spaghetti code here
 
-_debug_ = False 
-wuhome = "/root/wu"
-#wuhome = "/home/tazz/wu"
+_debug_ = True
+#wuhome = "/root/wu"
+wuhome = "/home/tazz/wu"
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -25,7 +25,6 @@ settings = {'cpws':"ISVIBLOV2",
 settings_fname = "wu.pck"
 pws=["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870","I2310","I1722","IMOSCOW260"]
 
-#import urllib2
 import json
 import sys
 import pickle
@@ -117,19 +116,19 @@ except (ValueError,IOError)as e:
 
 #load settings
 try:
-        settings = pickle.load( open( settings_fname, "rb" ) )
+    settings = pickle.load( open( settings_fname, "rb" ) )
 except IOError as e:
-        print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror,settings_fname)
-        print "[*] creating {0}".format(settings_fname)
-        settings['cpws'] = pws[0]
-        pickle.dump( settings, open( settings_fname, "wb" ))
+    print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror,settings_fname)
+    print "[*] creating {0}".format(settings_fname)
+    settings['cpws'] = pws[0]
+    pickle.dump( settings, open( settings_fname, "wb" ))
 
 cpws = settings['cpws']
 
 if arguments['pwswitch']:
-        print "[*] pws switch mode"
-        le = len(pws)
-        idx = pws.index(cpws)
+    print "[*] pws switch mode"
+    le = len(pws)
+    idx = pws.index(cpws)
         print "[*] pws len is {0}, cpws is {1}, index in pws is {2}".format(le,cpws,idx)
         if idx < le-1:
             idx+=1
