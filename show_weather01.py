@@ -22,13 +22,14 @@ settings = {'cpws':"ISVIBLOV2",
             'fname':"wu.pck",
             'pwsfile':"pws_list.txt"
 }
+
 settings_fname = "wu.pck"
-pws=["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870","I2310","I1722","IMOSCOW260"]
+pws = ["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870", "I2310", "I1722", "IMOSCOW260"]
 
 import json
 import sys
 import pickle
-from urllib2 import urlopen,URLError
+from urllib2 import urlopen, URLError
 from urllib import urlretrieve
 from time import localtime, sleep
 from os import getcwd, chdir, path
@@ -42,7 +43,7 @@ if not _debug_:
 
 def internet_on():
     try:
-        response=urlopen('http://google.com',timeout=20)
+        responsei = urlopen('http://google.com', timeout=20)
         return True
     except URLError as err: pass
     return False
@@ -50,15 +51,15 @@ def internet_on():
 def time_and_exit(mess):
     if not _debug_:
         with canvas(device) as draw:
-            draw.text((20, 15),hours+":"+minutes,font=font_ttf40, fill="gray")
+            draw.text((20, 15), hours+":"+minutes, font=font_ttf40, fill="gray")
     sys.exit(mess)
 
 if not _debug_:
     serial = i2c(port=1, address=0x3C)
     device = ssd1306(serial)
     font = ImageFont.load_default()
-    font_ttf30 = ImageFont.truetype(wuhome + "/luma/examples/fonts/C&C Red Alert [INET].ttf",30 )
-    font_ttf40 = ImageFont.truetype(wuhome + "/luma/examples/fonts/Volter__28Goldfish_29.ttf",35)
+    font_ttf30 = ImageFont.truetype(wuhome+"/luma/examples/fonts/C&C Red Alert [INET].ttf", 30)
+    font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
 arguments = docopt(__doc__, version='0.3')
@@ -68,12 +69,12 @@ print "[*] Startup ok"
 time = localtime()
 
 if time.tm_hour < 10:
-    hours = "0" + str(time.tm_hour)
+    hours = "0"+str(time.tm_hour)
 else:
     hours = str(time.tm_hour)
 
 if time.tm_min < 10:
-    minutes = "0" + str(time.tm_min)
+    minutes = "0"+str(time.tm_min)
 else:
     minutes = str(time.tm_min)
 
@@ -88,7 +89,7 @@ if internet_on():
 else:
     time_and_exit("We are offline. Exiting.")
 
-pwd=getcwd()
+pwd = getcwd()
 if pwd != wuhome:
     chdir(wuhome)
     print getcwd()
@@ -111,17 +112,17 @@ try:
             print "[**] Error load PWS list. Check {0} file.".format(settings['pwsfile'])
             #need workaround here for empty PWS list
         pws = pws_new
-except (ValueError,IOError)as e:
+except (ValueError, IOError)as e:
     time_and_exit("[**] Error load " + settings['pwsfile'] + " Exiting.")
 
 #load settings
 try:
-    settings = pickle.load( open( settings_fname, "rb" ) )
+    settings = pickle.load(open(settings_fname, "rb"))
 except IOError as e:
-    print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror,settings_fname)
+    print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings_fname)
     print "[*] creating {0}".format(settings_fname)
     settings['cpws'] = pws[0]
-    pickle.dump( settings, open( settings_fname, "wb" ))
+    pickle.dump(settings, open(settings_fname, "wb"))
 
 cpws = settings['cpws']
 
@@ -129,84 +130,83 @@ if arguments['pwswitch']:
     print "[*] pws switch mode"
     le = len(pws)
     idx = pws.index(cpws)
-    print "[*] pws len is {0}, cpws is {1}, index in pws is {2}".format(le,cpws,idx)
+    print "[*] pws len is {0}, cpws is {1}, index in pws is {2}".format(le, cpws, idx)
     if idx < le-1:
-        idx+=1
+        idx += 1
     else:
-        idx=0
+        idx = 0
     cpws = settings['cpws'] = pws[idx] #save new pws
     # cpws = pws[idx] # renew cur pws with new value
-    print "[*] idx is {0} and new cpws is {1}".format(idx,cpws)
+    print "[*] idx is {0} and new cpws is {1}".format(idx, cpws)
 
-print "[*] PWS: {0}".format( cpws )
+print "[*] PWS: {0}".format(cpws)
 
 if not _debug_:
     with canvas(device) as draw:
-        draw.text((00, 20),cpws,font=font_ttf30, fill="gray")
-    sleep(1);
+        draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
+    sleep(1)
 try:
     with open(cpws+".json") as pws_file:
         parsed_json = json.load(pws_file)
         pws_file.close()
-except (ValueError,IOError)as e:
+except (ValueError, IOError)as e:
     time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']['city']
 last_upd = parsed_json['current_observation']['observation_time']
 
 if arguments['hourly']:
-        print "[*] hourly mode"
-        NextH = settings['hourly_h']
-        print "[*] NextH is %s" % (NextH)
+    print "[*] hourly mode"
+    NextH = settings['hourly_h']
+    print "[*] NextH is %s" % (NextH)
 
-        temp_c = parsed_json['hourly_forecast'][NextH]['temp']['metric']
-        feelslike_c = parsed_json['hourly_forecast'][NextH]['feelslike']['metric']
-        sky = parsed_json['hourly_forecast'][NextH]['condition']
-        img = parsed_json['hourly_forecast'][NextH]['icon_url']
-        hours = parsed_json['hourly_forecast'][NextH]['FCTTIME']['hour']
-        minutes = parsed_json['hourly_forecast'][NextH]['FCTTIME']['min']
+    temp_c = parsed_json['hourly_forecast'][NextH]['temp']['metric']
+    feelslike_c = parsed_json['hourly_forecast'][NextH]['feelslike']['metric']
+    sky = parsed_json['hourly_forecast'][NextH]['condition']
+    img = parsed_json['hourly_forecast'][NextH]['icon_url']
+    hours = parsed_json['hourly_forecast'][NextH]['FCTTIME']['hour']
+    minutes = parsed_json['hourly_forecast'][NextH]['FCTTIME']['min']
 
-        if arguments['--prev'] and NextH > 1:
-            NextH -=2
-        else:
-            NextH+=2
-            if NextH == 34:
-                NextH = 0
+    if arguments['--prev'] and NextH > 1:
+        NextH -= 2
+    else:
+        NextH += 2
+        if NextH == 34:
+            NextH = 0
 
-        settings['hourly_h']=NextH
+    settings['hourly_h'] = NextH
 else:
-        temp_c = parsed_json['current_observation']['temp_c']
-        feelslike_c = parsed_json['current_observation']['feelslike_c']
-        sky = parsed_json['current_observation']['weather']
-        img = parsed_json['current_observation']['icon_url']
-        #img_a = img.split("/");
-        settings['hourly_h']=0
+    temp_c = parsed_json['current_observation']['temp_c']
+    feelslike_c = parsed_json['current_observation']['feelslike_c']
+    sky = parsed_json['current_observation']['weather']
+    img = parsed_json['current_observation']['icon_url']
+    #img_a = img.split("/");
+    settings['hourly_h'] = 0
 
 #for k  in img_a:
 #       print k
 
-img_a = img.split("/");
+img_a = img.split("/")
 sky_img = img_a[len(img_a)-1]
 
 if path.isfile(sky_img) is False:
         print "Download %s" % (sky_img)
         urlretrieve(img, sky_img)
 
-print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours,minutes,location,temp_c,sky,feelslike_c)
+print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, sky, feelslike_c)
 print "{0}".format(last_upd)
 #dump config data
-pickle.dump( settings, open( settings_fname, "wb" ))
+pickle.dump(settings, open(settings_fname, "wb"))
 
 if not _debug_:
-        pic = Image.open(sky_img).convert("RGBA")
-        with canvas(device) as draw:
+    pic = Image.open(sky_img).convert("RGBA")
+    with canvas(device) as draw:
 #       draw.rectangle(device.bounding_box, outline="white", fill="black")
-            draw.bitmap((0, 0), pic, fill=5)
-            draw.text((60, 0), hours+":"+minutes,font=font_ttf30, fill="gray")
-            draw.text((30, 40), str(temp_c)+"`C",font=font_ttf30, fill="white")
+        draw.bitmap((0, 0), pic, fill=5)
+        draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
+        draw.text((30, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
 #raw_input("Press Enter to continue...")
 #device.cleanup()
 
 #http://jsonviewer.stack.hu
-

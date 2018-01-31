@@ -18,7 +18,7 @@ Add periodic task for PWS data refresh in you crontab as:
 
 Add periodic task for LCD refresh/update in you crontab as:
 ```sh
-0  *\5  *  *  *  root   /usr/bin/python /home/tazz/wu/get_weather.sh
+0  *\5  *  *  *  root   /usr/bin/python /home/tazz/wu/show_weather01.py
 ```
 
 ![pic_first_run](https://github.com/joingig/wu/blob/test/imgs/pic03.jpg "first")
