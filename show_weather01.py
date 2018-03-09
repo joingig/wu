@@ -46,11 +46,12 @@ if not _debug_:
 def internet_on():
     for m in range(1, 4):
         try:
-            responsei = urlopen('http://google.com', timeout=10)
-            print "check internet, {} try".format(m)
+            responsei = urlopen('http://google.com', timeout=5)
             return True
         except URLError as err: pass
-        return False
+        print "internet check fail, {} try".format(m)
+        continue
+    return False
 
 def time_and_exit(mess):
     if not _debug_:
