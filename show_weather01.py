@@ -12,18 +12,20 @@ Options:
   --prev                   show prev hour from "36 hours" weather report
 """
 
-#maximum spaghetti code here
+#
+#maximum spaghetti code below
 
-_debug_ = False 
+_debug_ = False
 wuhome = "/root/wu"
 #wuhome = "/home/tazz/wu"
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
             'pwsfile':"pws_list.txt"
-}
+           }
 
-settings_fname = "wu.pck"
+#settings_fname = "wu.pck"
+# predefined PWS still needed?
 pws = ["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870", "I2310", "I1722", "IMOSCOW260"]
 
 import json
@@ -42,10 +44,13 @@ if not _debug_:
     from PIL import ImageFont, Image
 
 def internet_on():
-    try:
-        responsei = urlopen('http://google.com', timeout=20)
-        return True
-    except URLError as err: pass
+    for m in range(1, 4):
+        try:
+            responsei = urlopen('http://google.com', timeout=5)
+            return True
+        except URLError as err: pass
+        print "internet check fail, {} try".format(m)
+        continue
     return False
 
 def time_and_exit(mess):
@@ -62,7 +67,7 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.3')
+arguments = docopt(__doc__, version='0.4')
 #print(arguments)
 print "[*] Startup ok"
 
@@ -117,12 +122,12 @@ except (ValueError, IOError)as e:
 
 #load settings
 try:
-    settings = pickle.load(open(settings_fname, "rb"))
+    settings = pickle.load(open(settings['fname'], "rb"))
 except IOError as e:
     print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings_fname)
-    print "[*] creating {0}".format(settings_fname)
+    print "[*] creating {0}".format(settings['fname'])
     settings['cpws'] = pws[0]
-    pickle.dump(settings, open(settings_fname, "wb"))
+    pickle.dump(settings, open(settings['fname'], "wb"))
 
 cpws = settings['cpws']
 
@@ -190,13 +195,13 @@ img_a = img.split("/")
 sky_img = img_a[len(img_a)-1]
 
 if path.isfile(sky_img) is False:
-        print "Download %s" % (sky_img)
-        urlretrieve(img, sky_img)
+    print "Download %s" % (sky_img)
+    urlretrieve(img, sky_img)
 
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, sky, feelslike_c)
 print "{0}".format(last_upd)
 #dump config data
-pickle.dump(settings, open(settings_fname, "wb"))
+pickle.dump(settings, open(settings['fname'], "wb"))
 
 if not _debug_:
     pic = Image.open(sky_img).convert("RGBA")
