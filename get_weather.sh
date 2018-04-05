@@ -1,11 +1,12 @@
 #!/bin/bash
 
-#wuhome=/root/wu
-wuhome=/home/tazz/wu
+wuhome=/root/wu
+#wuhome=/home/tazz/wu
 
 pws=$wuhome/pws_list.txt
 if [ ! -e $wuhome/wu.key ]; then
 	printf "wunderground key not found in %s \n" $wuhome/wu.key 
+        logger "$0 wunderground key not found in $wuhome/wu.key"
 	exit 100
 fi
 wukkey=`head $wuhome/wu.key`
