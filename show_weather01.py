@@ -31,6 +31,7 @@ pws = ["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870", "I2310", "I1722", "
 import json
 import sys
 import pickle
+import syslog as log
 from urllib2 import urlopen, URLError
 from urllib import urlretrieve
 from time import localtime, sleep
@@ -50,6 +51,7 @@ def internet_on():
             return True
         except URLError as err: pass
         print "internet check fail, {} try".format(m)
+        log.syslog("Internet check fail")
         continue
     return False
 
