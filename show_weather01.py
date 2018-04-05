@@ -15,9 +15,11 @@ Options:
 #
 #maximum spaghetti code below
 
-_debug_ = False
-wuhome = "/root/wu"
-#wuhome = "/home/tazz/wu"
+_debug_ = True
+if _debug_:
+    wuhome = "/home/tazz/wu"
+else:
+    wuhome = "/root/wu"
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -31,6 +33,7 @@ pws = ["IMOSCOW36", "ISVIBLOV2", "IMOSKVA414", "IMOSKVA870", "I2310", "I1722", "
 import json
 import sys
 import pickle
+import syslog as log
 from urllib2 import urlopen, URLError
 from urllib import urlretrieve
 from time import localtime, sleep
@@ -50,6 +53,7 @@ def internet_on():
             return True
         except URLError as err: pass
         print "internet check fail, {} try".format(m)
+        log.syslog("Internet connection check failed")
         continue
     return False
 
@@ -124,7 +128,7 @@ except (ValueError, IOError)as e:
 try:
     settings = pickle.load(open(settings['fname'], "rb"))
 except IOError as e:
-    print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings_fname)
+    print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings['fname'])
     print "[*] creating {0}".format(settings['fname'])
     settings['cpws'] = pws[0]
     pickle.dump(settings, open(settings['fname'], "wb"))
@@ -200,6 +204,7 @@ if path.isfile(sky_img) is False:
 
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, sky, feelslike_c)
 print "{0}".format(last_upd)
+log.syslog(cpws+" "+last_upd)
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
 
