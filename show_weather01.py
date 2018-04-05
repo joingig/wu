@@ -15,7 +15,7 @@ Options:
 #
 #maximum spaghetti code below
 
-_debug_ = True
+_debug_ = False 
 if _debug_:
     wuhome = "/home/tazz/wu"
 else:
