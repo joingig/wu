@@ -49,7 +49,7 @@ if not _debug_:
 def internet_on():
     for m in range(1, 4):
         try:
-            responsei = urlopen('http://google.com', timeout=5)
+            responsei = urlopen('https://ya.ru', timeout=5)
             return True
         except URLError as err: pass
         print "internet check fail, {} try".format(m)
