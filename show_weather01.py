@@ -71,7 +71,8 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.4')
+# fix situation when remove/comment out current pws
+arguments = docopt(__doc__, version='0.5')
 #print(arguments)
 print "[*] Startup ok"
 
@@ -134,6 +135,10 @@ except IOError as e:
     pickle.dump(settings, open(settings['fname'], "wb"))
 
 cpws = settings['cpws']
+
+if cpws not in pws:
+   print "PWS {} was removed, we fall back to begin list".format(cpws)
+   cpws = pws[0]
 
 if arguments['pwswitch']:
     print "[*] pws switch mode"
