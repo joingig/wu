@@ -173,22 +173,30 @@ if arguments['hourly']:
     print "[*] hourly mode"
     NextH = settings['hourly_h']
     print "[*] NextH is %s" % (NextH)
+    try:
+        temp_c = parsed_json['hourly_forecast'][NextH]['temp']['metric']
+        feelslike_c = parsed_json['hourly_forecast'][NextH]['feelslike']['metric']
+        sky = parsed_json['hourly_forecast'][NextH]['condition']
+        img = parsed_json['hourly_forecast'][NextH]['icon_url']
+        hours = parsed_json['hourly_forecast'][NextH]['FCTTIME']['hour']
+        minutes = parsed_json['hourly_forecast'][NextH]['FCTTIME']['min']
 
-    temp_c = parsed_json['hourly_forecast'][NextH]['temp']['metric']
-    feelslike_c = parsed_json['hourly_forecast'][NextH]['feelslike']['metric']
-    sky = parsed_json['hourly_forecast'][NextH]['condition']
-    img = parsed_json['hourly_forecast'][NextH]['icon_url']
-    hours = parsed_json['hourly_forecast'][NextH]['FCTTIME']['hour']
-    minutes = parsed_json['hourly_forecast'][NextH]['FCTTIME']['min']
+        if arguments['--prev'] and NextH > 1:
+            NextH -= 2
+        else:
+            NextH += 2
+            if NextH == 34:
+               NextH = 0
 
-    if arguments['--prev'] and NextH > 1:
-        NextH -= 2
-    else:
-        NextH += 2
-        if NextH == 34:
-            NextH = 0
+        settings['hourly_h'] = NextH
+    except (IndexError) as e:
+        print "[**] Error in data or hourly data loss\n[**] Try another PWS."
+        temp_c = parsed_json['current_observation']['temp_c']
+        feelslike_c = parsed_json['current_observation']['feelslike_c']
+        sky = parsed_json['current_observation']['weather']
+        img = parsed_json['current_observation']['icon_url']
+        settings['hourly_h'] = 0
 
-    settings['hourly_h'] = NextH
 else:
     temp_c = parsed_json['current_observation']['temp_c']
     feelslike_c = parsed_json['current_observation']['feelslike_c']
