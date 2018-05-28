@@ -21,5 +21,11 @@ Add periodic task for LCD refresh/update in you crontab as:
 0  *\5  *  *  *  root   /usr/bin/python /home/tazz/wu/show_weather01.py
 ```
 
+### install requirements.txt
+```sh
+pip install -r /path/to/requirements.txt
+```
+
+
 ![pic_first_run](https://github.com/joingig/wu/blob/test/imgs/pic03.jpg "first")
 
