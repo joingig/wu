@@ -23,7 +23,7 @@ Add periodic task for LCD refresh/update in you crontab as:
 
 ### install requirements.txt
 ```sh
-pip install -r /path/to/requirements.txt
+pip install -r requirements.txt
 ```
 
 
