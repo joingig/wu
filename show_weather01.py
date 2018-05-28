@@ -49,7 +49,7 @@ if not _debug_:
 def internet_on():
     for m in range(1, 4):
         try:
-            responsei = urlopen('http://google.com', timeout=5)
+            responsei = urlopen('https://ya.ru', timeout=5)
             return True
         except URLError as err: pass
         print "internet check fail, {} try".format(m)
@@ -71,7 +71,8 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.4')
+# fix situation when remove/comment out current pws
+arguments = docopt(__doc__, version='0.5')
 #print(arguments)
 print "[*] Startup ok"
 
@@ -135,6 +136,10 @@ except IOError as e:
 
 cpws = settings['cpws']
 
+if cpws not in pws:
+   print "PWS {} was removed, we fall back to begin list".format(cpws)
+   cpws = pws[0]
+
 if arguments['pwswitch']:
     print "[*] pws switch mode"
     le = len(pws)
@@ -168,22 +173,30 @@ if arguments['hourly']:
     print "[*] hourly mode"
     NextH = settings['hourly_h']
     print "[*] NextH is %s" % (NextH)
+    try:
+        temp_c = parsed_json['hourly_forecast'][NextH]['temp']['metric']
+        feelslike_c = parsed_json['hourly_forecast'][NextH]['feelslike']['metric']
+        sky = parsed_json['hourly_forecast'][NextH]['condition']
+        img = parsed_json['hourly_forecast'][NextH]['icon_url']
+        hours = parsed_json['hourly_forecast'][NextH]['FCTTIME']['hour']
+        minutes = parsed_json['hourly_forecast'][NextH]['FCTTIME']['min']
 
-    temp_c = parsed_json['hourly_forecast'][NextH]['temp']['metric']
-    feelslike_c = parsed_json['hourly_forecast'][NextH]['feelslike']['metric']
-    sky = parsed_json['hourly_forecast'][NextH]['condition']
-    img = parsed_json['hourly_forecast'][NextH]['icon_url']
-    hours = parsed_json['hourly_forecast'][NextH]['FCTTIME']['hour']
-    minutes = parsed_json['hourly_forecast'][NextH]['FCTTIME']['min']
+        if arguments['--prev'] and NextH > 1:
+            NextH -= 2
+        else:
+            NextH += 2
+            if NextH == 34:
+               NextH = 0
 
-    if arguments['--prev'] and NextH > 1:
-        NextH -= 2
-    else:
-        NextH += 2
-        if NextH == 34:
-            NextH = 0
+        settings['hourly_h'] = NextH
+    except (IndexError) as e:
+        print "[**] Error in data or hourly data loss\n[**] Try another PWS."
+        temp_c = parsed_json['current_observation']['temp_c']
+        feelslike_c = parsed_json['current_observation']['feelslike_c']
+        sky = parsed_json['current_observation']['weather']
+        img = parsed_json['current_observation']['icon_url']
+        settings['hourly_h'] = 0
 
-    settings['hourly_h'] = NextH
 else:
     temp_c = parsed_json['current_observation']['temp_c']
     feelslike_c = parsed_json['current_observation']['feelslike_c']
