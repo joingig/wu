@@ -155,10 +155,12 @@ if arguments['pwswitch']:
 
 print "[*] PWS: {0}".format(cpws)
 
-if not _debug_:
-    with canvas(device) as draw:
-        draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
-    sleep(1)
+#if not _debug_:
+#    with canvas(device) as draw:
+#        draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
+#        draw.text((00,55),"Last update",font=font,fill="gray")
+#    sleep(1)
+
 try:
     with open(cpws+".json") as pws_file:
         parsed_json = json.load(pws_file)
@@ -215,6 +217,12 @@ if path.isfile(sky_img) is False:
     print "Download %s" % (sky_img)
     urlretrieve(img, sky_img)
 
+
+if not _debug_:
+    with canvas(device) as draw:
+        draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
+        draw.text((00,55),last_upd.replace('Last Updated on ',''),font=font,fill="gray")
+    sleep(1)
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, sky, feelslike_c)
 print "{0}".format(last_upd)
 log.syslog(cpws+" "+last_upd)
