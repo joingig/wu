@@ -71,7 +71,6 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-# fix situation when remove/comment out current pws
 arguments = docopt(__doc__, version='0.5')
 #print(arguments)
 print "[*] Startup ok"
@@ -89,7 +88,7 @@ else:
     minutes = str(time.tm_min)
 
 
-#night mode between 01 and 06 am / we not showing weather
+#night mode between 01 and 06 am / we not showing weather / only time
 #if time.tm_hour > 0 and time.tm_hour < 6:
 if arguments['night']:
     time_and_exit("Deep night. Exiting.")
@@ -213,10 +212,14 @@ else:
 img_a = img.split("/")
 sky_img = img_a[len(img_a)-1]
 
-if path.isfile(sky_img) is False:
+if "nt_.gif" in sky_img: #nt_.gif is broken image on weather underground
+    log.syslog("Image is corrupted "+sky_img)
+    sky_img = "noun_sun01.gif"
+print "Image file {0}".format(sky_img) 
+
+if not path.isfile(sky_img):
     print "Download %s" % (sky_img)
     urlretrieve(img, sky_img)
-
 
 if not _debug_:
     with canvas(device) as draw:
