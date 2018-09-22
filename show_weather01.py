@@ -215,6 +215,9 @@ sky_img = img_a[len(img_a)-1]
 if "nt_.gif" in sky_img: #nt_.gif is broken image on weather underground
     log.syslog("Image is corrupted "+sky_img)
     sky_img = "noun_sun01.gif"
+elif sky_img[0] == ".": # second type of broke img is .gif 
+    log.syslog("Image is corrupted "+sky_img)
+    sky_img = "noun_sun01.gif"
 print "Image file {0}".format(sky_img) 
 
 if not path.isfile(sky_img):
