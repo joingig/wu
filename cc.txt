@@ -1,0 +1,37 @@
+
+  "current_condition": [
+      {
+        "FeelsLikeF": "49",
+        "windspeedKmph": "30",
+        "windspeedMiles": "19",
+        "weatherDesc": [
+          {
+            "value": "Partly cloudy"
+          }
+        ],
+        "weatherIconUrl": [
+          {
+            "value": "http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0002_sunny_intervals.png"
+          }
+        ],
+        "weatherCode": "116",
+        "temp_F": "54",
+        "temp_C": "12",
+        "observation_time": "01:29 PM",
+        "winddirDegree": "260",
+        "winddir16Point": "W",
+        "precipMM": "0.2",
+        "humidity": "54",
+        "visibility": "10",
+        "pressure": "1001",
+        "cloudcover": "37",
+        "FeelsLikeC": "9"
+      }
+    ],
+    "request": [
+      {
+        "query": "Moscow, Russia",
+        "type": "City"
+      }
+    ]
+
