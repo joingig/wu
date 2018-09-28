@@ -14,7 +14,7 @@ Options:
 #
 #maximum spaghetti code below
 
-_debug_ = True
+_debug_ = False
 if _debug_:
     wuhome = "/home/tazz/wu"
 else:
@@ -48,9 +48,10 @@ def internet_on():
         try:
             responsei = urlopen('https://ya.ru', timeout=5)
             return True
-        except URLError as err: pass
-        print "internet check fail, {} try".format(m)
-        log.syslog("Internet connection check failed")
+        except URLError as err: 
+            pass
+            print "internet check fail, {} try".format(m)
+            log.syslog("Internet connection check failed")
         continue
     return False
 
@@ -118,47 +119,23 @@ except (ValueError, IOError)as e:
 
 location = parsed_json['data']["time_zone"][0]['zone']
 last_upd = parsed_json['data']["time_zone"][0]['localtime']
-
-print "weather in {0} , time is {1}".format(location, last_upd)
-
-sys.exit(0)
+current_condition = parsed_json['data']['current_condition']
+flc = current_condition[0]['FeelsLikeC']
+wdes = current_condition[0]['weatherDesc'][0]['value']
+print "weather in {} is {} and feels like {}'C, time is {}".format(location,wdes,flc, last_upd)
+img = current_condition[0]['weatherIconUrl'][0]['value']
 
 #cat wwo00.json | jq .data.current_condition | more
 #cat wwo00.json | jq .data.request | more
-#[
-#      {
-#              "query": "Moscow, Russia",
-#              "type": "City"
-#            }
-#]
-#"time_zone": [
-#         {
-#                  "zone": "Europe/Moscow",
-#                   "utcOffset": "3.0",
-#                  "localtime": "2018-09-27 17:11"
-#
-#}
-#      ],
-
-
-
-#for k  in img_a:
-#       print k
 
 img_a = img.split("/")
-sky_img = img_a[len(img_a)-1]
-
-if "nt_.gif" in sky_img: #nt_.gif is broken image on weather underground
-    log.syslog("Image is corrupted "+sky_img)
-    sky_img = "noun_sun01.gif"
-elif sky_img[0] == ".": # second type of broke img is .gif
-    log.syslog("Image is corrupted "+sky_img)
-    sky_img = "noun_sun01.gif"
-print "Image file {0}".format(sky_img)
+sky_img = img_a[-1]
 
 if not path.isfile(sky_img):
     print "Download %s" % (sky_img)
     urlretrieve(img, sky_img)
+
+sys.exit(0)
 
 if not _debug_:
     with canvas(device) as draw:
