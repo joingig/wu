@@ -122,7 +122,7 @@ last_upd = parsed_json['data']["time_zone"][0]['localtime']
 current_condition = parsed_json['data']['current_condition']
 flc = current_condition[0]['FeelsLikeC']
 wdes = current_condition[0]['weatherDesc'][0]['value']
-print "weather in {} is {} and feels like {}'C, time is {}".format(location,wdes,flc, last_upd)
+print "In {} is {}, feels like {}'C, time is {}".format(location,wdes,flc, last_upd)
 img = current_condition[0]['weatherIconUrl'][0]['value']
 
 #cat wwo00.json | jq .data.current_condition | more
