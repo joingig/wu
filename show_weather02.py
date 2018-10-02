@@ -106,7 +106,7 @@ try:
 except IOError as e:
     print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings['fname'])
     print "[*] creating {0}".format(settings['fname'])
-    settings['cpws'] = pws[0]
+    settings['cpws'] = None
     pickle.dump(settings, open(settings['fname'], "wb"))
 
 
@@ -120,9 +120,12 @@ except (ValueError, IOError)as e:
 location = parsed_json['data']["time_zone"][0]['zone']
 last_upd = parsed_json['data']["time_zone"][0]['localtime']
 current_condition = parsed_json['data']['current_condition']
-flc = current_condition[0]['FeelsLikeC']
+
+#print current_condition
+
+feelslike_c = current_condition[0]['FeelsLikeC']
+temp_c = current_condition[0]['temp_C']
 wdes = current_condition[0]['weatherDesc'][0]['value']
-print "In {} is {}, feels like {}'C, time is {}".format(location,wdes,flc, last_upd)
 img = current_condition[0]['weatherIconUrl'][0]['value']
 
 #cat wwo00.json | jq .data.current_condition | more
@@ -135,21 +138,22 @@ if not path.isfile(sky_img):
     print "Download %s" % (sky_img)
     urlretrieve(img, sky_img)
 
-sys.exit(0)
 
 if not _debug_:
     with canvas(device) as draw:
-        draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
+       # draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
         draw.text((00,55),last_upd.replace('Last Updated on ',''),font=font,fill="gray")
     sleep(1)
-print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, sky, feelslike_c)
-print "{0}".format(last_upd)
-log.syslog(cpws+" "+last_upd)
+print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, wdes, feelslike_c)
+log.syslog("Weather updated at "+last_upd)
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
 
 if not _debug_:
     pic = Image.open(sky_img).convert("RGBA")
+    pix = pic.load()
+    color = pix[4,4]
+    print color
     with canvas(device) as draw:
 #       draw.rectangle(device.bounding_box, outline="white", fill="black")
         draw.bitmap((0, 0), pic, fill=5)
