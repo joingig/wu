@@ -1,17 +1,13 @@
 """Usage:
   show_weather01.py
   show_weather01.py night
-  show_weather01.py hourly [--next | --prev]
   show_weather01.py -h | --help | --version
 
 Options:
   -h --help                show this help message and exit
   --version                show version and exit
-  --next                   show next hour from "36 hours" weather report
-  --prev                   show prev hour from "36 hours" weather report
 """
 
-#
 #maximum spaghetti code below
 
 _debug_ = False
@@ -69,7 +65,7 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.5')
+arguments = docopt(__doc__, version='0.02 with WWO API')
 print(arguments)
 print "[*] Startup ok"
 
@@ -137,13 +133,35 @@ sky_img = img_a[-1]
 if not path.isfile(sky_img):
     print "Download %s" % (sky_img)
     urlretrieve(img, sky_img)
+#   conv png2gif with trans and save
+    png = Image.open(sky_img).convert("RGB")
+    gif = Image.new("RGBA", png.size, (255,0,0,0))
+    img = png.load()
+    bkgr = img[5,5]
+    if _debug_:
+        print "Background color is: {}".format(bkgr) 
+    
+    png_data=png.getdata()
+    gif_data=[]
 
+    for item in png_data:
+        if item==bkgr:
+            gif_data.append((0,0,0))
+        else:
+            gif_data.append(item)
+    
+    gif.putdata(gif_data)
+    sky_img = path.splitext(sky_img)[0]+".gif"
+    gif.save(sky_img,'GIF',transparency=0)
+else:
+    sky_img = path.splitext(sky_img)[0]+".gif"
 
 if not _debug_:
     with canvas(device) as draw:
        # draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
         draw.text((00,55),last_upd.replace('Last Updated on ',''),font=font,fill="gray")
     sleep(1)
+
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, wdes, feelslike_c)
 log.syslog("Weather updated at "+last_upd)
 #dump config data
@@ -151,9 +169,6 @@ pickle.dump(settings, open(settings['fname'], "wb"))
 
 if not _debug_:
     pic = Image.open(sky_img).convert("RGBA")
-    pix = pic.load()
-    color = pix[4,4]
-    print color
     with canvas(device) as draw:
 #       draw.rectangle(device.bounding_box, outline="white", fill="black")
         draw.bitmap((0, 0), pic, fill=5)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#wuhome=/root/wu
-wuhome=/home/tazz/wu
+wuhome=/root/wu
+#wuhome=/home/tazz/wu
 
 if [ ! -e $wuhome/wwo.key ]; then
 	printf "worldweatheronline key not found in %s \n" $wuhome/wwo.key 
