@@ -10,7 +10,7 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ = False
+_debug_ = True
 if _debug_:
     wuhome = "/home/tazz/wu"
 else:
@@ -32,6 +32,7 @@ from urllib import urlretrieve
 from time import localtime, sleep
 from os import getcwd, chdir, path
 from docopt import docopt
+from PIL import ImageFont, Image
 
 if not _debug_:
     from luma.core.serial import i2c
@@ -44,7 +45,7 @@ def internet_on():
         try:
             responsei = urlopen('https://ya.ru', timeout=5)
             return True
-        except URLError as err: 
+        except URLError as err:
             pass
             print "internet check fail, {} try".format(m)
             log.syslog("Internet connection check failed")
@@ -65,8 +66,9 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.02 with WWO API')
-print(arguments)
+arguments = docopt(__doc__, version='0.03 with WWO API')
+if _debug_:
+    print(arguments)
 print "[*] Startup ok"
 
 time = localtime()
@@ -105,7 +107,6 @@ except IOError as e:
     settings['cpws'] = None
     pickle.dump(settings, open(settings['fname'], "wb"))
 
-
 try:
     with open(wwo) as weather_file:
         parsed_json = json.load(weather_file)
@@ -122,25 +123,25 @@ current_condition = parsed_json['data']['current_condition']
 feelslike_c = current_condition[0]['FeelsLikeC']
 temp_c = current_condition[0]['temp_C']
 wdes = current_condition[0]['weatherDesc'][0]['value']
-img = current_condition[0]['weatherIconUrl'][0]['value']
+img_url = current_condition[0]['weatherIconUrl'][0]['value']
 
 #cat wwo00.json | jq .data.current_condition | more
 #cat wwo00.json | jq .data.request | more
 
-img_a = img.split("/")
-sky_img = img_a[-1]
+#img_a = img_url.split("/")[-1]
+sky_img = img_url.split("/")[-1]
 
 if not path.isfile(sky_img):
     print "Download %s" % (sky_img)
-    urlretrieve(img, sky_img)
+    urlretrieve(img_url, sky_img)
 #   conv png2gif with trans and save
     png = Image.open(sky_img).convert("RGB")
     gif = Image.new("RGBA", png.size, (255,0,0,0))
     img = png.load()
     bkgr = img[5,5]
     if _debug_:
-        print "Background color is: {}".format(bkgr) 
-    
+        print "Background color is: {}".format(bkgr)
+
     png_data=png.getdata()
     gif_data=[]
 
@@ -149,7 +150,7 @@ if not path.isfile(sky_img):
             gif_data.append((0,0,0))
         else:
             gif_data.append(item)
-    
+
     gif.putdata(gif_data)
     sky_img = path.splitext(sky_img)[0]+".gif"
     gif.save(sky_img,'GIF',transparency=0)
