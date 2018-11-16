@@ -124,6 +124,7 @@ feelslike_c = current_condition[0]['FeelsLikeC']
 temp_c = current_condition[0]['temp_C']
 wdes = current_condition[0]['weatherDesc'][0]['value']
 img_url = current_condition[0]['weatherIconUrl'][0]['value']
+wcode = current_condition[0]['weatherCode']
 
 #cat wwo00.json | jq .data.current_condition | more
 #cat wwo00.json | jq .data.request | more
@@ -163,7 +164,7 @@ if not _debug_:
         draw.text((00,55),last_upd.replace('Last Updated on ',''),font=font,fill="gray")
     sleep(1)
 
-print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C" % (hours, minutes, location, temp_c, wdes, feelslike_c)
+print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C. \nWeather code: %s" % (hours, minutes, location, temp_c, wdes, feelslike_c, wcode)
 log.syslog("Weather updated at "+last_upd)
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
