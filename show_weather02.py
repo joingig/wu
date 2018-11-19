@@ -10,7 +10,7 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ = True
+_debug_ = False 
 if _debug_:
     wuhome = "/home/tazz/wu"
 else:
@@ -162,6 +162,9 @@ if not path.isfile(sky_img):
     gif.save(sky_img, 'GIF', transparency=0)
 else:
     sky_img = path.splitext(sky_img)[0]+".gif"
+
+
+sky_img = "imgs/PNGs_64x64/"+path.splitext(sky_img)[0]+".png"
 
 if not _debug_:
     with canvas(device) as draw:
