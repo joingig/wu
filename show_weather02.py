@@ -38,12 +38,14 @@ if not _debug_:
     from luma.core.serial import i2c
     from luma.core.render import canvas
     from luma.oled.device import ssd1306
-    from PIL import ImageFont, Image
 
 def internet_on():
+    """
+    Check Internet connection.
+    """
     for m in range(1, 4):
         try:
-            responsei = urlopen('https://ya.ru', timeout=5)
+            urlopen('https://ya.ru', timeout=5)
             return True
         except URLError as err:
             pass
@@ -53,6 +55,9 @@ def internet_on():
     return False
 
 def time_and_exit(mess):
+    """
+    Print current time and exit
+    """
     if not _debug_:
         with canvas(device) as draw:
             draw.text((20, 15), hours+":"+minutes, font=font_ttf40, fill="gray")
@@ -68,7 +73,7 @@ if not _debug_:
 
 arguments = docopt(__doc__, version='0.03 with WWO API')
 if _debug_:
-    print(arguments)
+    print arguments
 print "[*] Startup ok"
 
 time = localtime()
@@ -137,31 +142,30 @@ if not path.isfile(sky_img):
     urlretrieve(img_url, sky_img)
 #   conv png2gif with trans and save
     png = Image.open(sky_img).convert("RGB")
-    gif = Image.new("RGBA", png.size, (255,0,0,0))
+    gif = Image.new("RGBA", png.size, (255, 0, 0, 0))
     img = png.load()
-    bkgr = img[5,5]
+    bkgr = img[5, 5]
     if _debug_:
         print "Background color is: {}".format(bkgr)
 
-    png_data=png.getdata()
-    gif_data=[]
+    png_data = png.getdata()
+    gif_data = []
 
     for item in png_data:
-        if item==bkgr:
-            gif_data.append((0,0,0))
+        if item == bkgr:
+            gif_data.append((0, 0, 0))
         else:
             gif_data.append(item)
 
     gif.putdata(gif_data)
-    sky_img = path.splitext(sky_img)[0]+".gif"
-    gif.save(sky_img,'GIF',transparency=0)
+    sky_img = path.splitext(sky_img)[0] + ".gif"
+    gif.save(sky_img, 'GIF', transparency=0)
 else:
     sky_img = path.splitext(sky_img)[0]+".gif"
 
 if not _debug_:
     with canvas(device) as draw:
-       # draw.text((00, 20), cpws, font=font_ttf30, fill="gray")
-        draw.text((00,55),last_upd.replace('Last Updated on ',''),font=font,fill="gray")
+        draw.text((00, 55), last_upd.replace('Last Updated on ', ''), font=font, fill="gray")
     sleep(1)
 
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C. \nWeather code: %s" % (hours, minutes, location, temp_c, wdes, feelslike_c, wcode)
