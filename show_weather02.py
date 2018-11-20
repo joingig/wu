@@ -10,7 +10,7 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ = False 
+_debug_ =  True
 if _debug_:
     wuhome = "/home/tazz/wu"
 else:
@@ -26,6 +26,7 @@ wwo = "wwo00.json"
 import json
 import sys
 import pickle
+import logging
 import syslog as log
 from urllib2 import urlopen, URLError
 from urllib import urlretrieve
@@ -135,36 +136,47 @@ wcode = current_condition[0]['weatherCode']
 #cat wwo00.json | jq .data.request | more
 
 #img_a = img_url.split("/")[-1]
-sky_img = img_url.split("/")[-1]
+sky_img = "imgs/PNGs_64x64/"+img_url.split("/")[-1]
 
-if not path.isfile(sky_img):
-    print "Download %s" % (sky_img)
-    urlretrieve(img_url, sky_img)
-#   conv png2gif with trans and save
-    png = Image.open(sky_img).convert("RGB")
-    gif = Image.new("RGBA", png.size, (255, 0, 0, 0))
-    img = png.load()
-    bkgr = img[5, 5]
-    if _debug_:
-        print "Background color is: {}".format(bkgr)
+print sky_img
 
-    png_data = png.getdata()
-    gif_data = []
+#if not path.isfile(sky_img):
+#    print "Download %s" % (sky_img)
+#    urlretrieve(img_url, sky_img)
+##   conv png2gif with trans and save
+#    png = Image.open(sky_img).convert("RGB")
+#    gif = Image.new("RGBA", png.size, (255, 0, 0, 0))
+#    img = png.load()
+#    bkgr = img[5, 5]
+#    if _debug_:
+#        print "Background color is: {}".format(bkgr)
+#
+#    png_data = png.getdata()
+#    gif_data = []
+#
+#    for item in png_data:
+#        if item == bkgr:
+#            gif_data.append((0, 0, 0))
+#        else:
+#            gif_data.append(item)
+#
+#    gif.putdata(gif_data)
+#    sky_img = path.splitext(sky_img)[0] + ".gif"
+#    gif.save(sky_img, 'GIF', transparency=0)
+#else:
+#    sky_img = path.splitext(sky_img)[0]+".gif"
+#
+#sky_img = "imgs/PNGs_64x64/"+path.splitext(sky_img)[0]+".png"
 
-    for item in png_data:
-        if item == bkgr:
-            gif_data.append((0, 0, 0))
-        else:
-            gif_data.append(item)
 
-    gif.putdata(gif_data)
-    sky_img = path.splitext(sky_img)[0] + ".gif"
-    gif.save(sky_img, 'GIF', transparency=0)
-else:
-    sky_img = path.splitext(sky_img)[0]+".gif"
+pic = Image.open(sky_img)
+#print pic.size
+pixcut = 9
+crop = pic.crop((pixcut, pixcut, pic.size[0]-pixcut, pic.size[1]-pixcut))
+crop.save("crop.png", "PNG")
+pic.close()
+crop.close()
 
-
-sky_img = "imgs/PNGs_64x64/"+path.splitext(sky_img)[0]+".png"
 
 if not _debug_:
     with canvas(device) as draw:
@@ -177,13 +189,16 @@ log.syslog("Weather updated at "+last_upd)
 pickle.dump(settings, open(settings['fname'], "wb"))
 
 if not _debug_:
-    pic = Image.open(sky_img).convert("RGBA")
+#    pic = Image.open(sky_img).convert("RGBA")
+    pic = Image.open(sky_img)
+
     with canvas(device) as draw:
 #       draw.rectangle(device.bounding_box, outline="white", fill="black")
         draw.bitmap((0, 0), pic, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
         draw.text((30, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
+    pic.close()
 #raw_input("Press Enter to continue...")
 #device.cleanup()
 
