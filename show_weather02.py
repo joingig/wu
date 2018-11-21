@@ -10,7 +10,7 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ =  True
+_debug_ = False 
 if _debug_:
     wuhome = "/home/tazz/wu"
 else:
@@ -136,7 +136,8 @@ wcode = current_condition[0]['weatherCode']
 #cat wwo00.json | jq .data.request | more
 
 #img_a = img_url.split("/")[-1]
-sky_img = "imgs/PNGs_64x64/"+img_url.split("/")[-1]
+#sky_img = "imgs/PNGs_64x64/"+img_url.split("/")[-1]
+sky_img = "imgs/PNGs_64x64/"+path.basename(img_url)
 
 print sky_img
 
@@ -199,7 +200,6 @@ if not _debug_:
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
         draw.text((30, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
-    pic.close()
 #raw_input("Press Enter to continue...")
 #device.cleanup()
 
