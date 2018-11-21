@@ -169,13 +169,13 @@ print sky_img
 #sky_img = "imgs/PNGs_64x64/"+path.splitext(sky_img)[0]+".png"
 
 
-pic = Image.open(sky_img)
-#print pic.size
-pixcut = 9
-crop = pic.crop((pixcut, pixcut, pic.size[0]-pixcut, pic.size[1]-pixcut))
-crop.save("crop.png", "PNG")
-pic.close()
-crop.close()
+#pic = Image.open(sky_img)
+##print pic.size
+#pixcut = 9
+#crop = pic.crop((pixcut, pixcut, pic.size[0]-pixcut, pic.size[1]-pixcut))
+#crop.save("crop.png", "PNG")
+#pic.close()
+#crop.close()
 
 
 if not _debug_:
@@ -191,10 +191,11 @@ pickle.dump(settings, open(settings['fname'], "wb"))
 if not _debug_:
 #    pic = Image.open(sky_img).convert("RGBA")
     pic = Image.open(sky_img)
-
+    pixcut = 9
+    crop = pic.crop((pixcut, pixcut, pic.size[0]-pixcut, pic.size[1]-pixcut))
     with canvas(device) as draw:
 #       draw.rectangle(device.bounding_box, outline="white", fill="black")
-        draw.bitmap((0, 0), pic, fill=5)
+        draw.bitmap((0, 0), crop, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
         draw.text((30, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
