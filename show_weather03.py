@@ -157,16 +157,11 @@ log.syslog("Weather updated at "+last_upd)
 pickle.dump(settings, open(settings['fname'], "wb"))
 
 if not _debug_:
-#   pic = Image.open(sky_img).convert("RGBA")
-    pic = Image.open(sky_img)
-    pixcut = 9
-   #print pic.size
+    pic = Image.open(sky_img).resize((50,50))
+    #pixcut = 9
     #crop = pic.crop((pixcut, pixcut, pic.size[0]-pixcut, pic.size[1]-pixcut))
-    crop2 = pic.resize((50,50))
-    #print type(crop)
-    #print type(crop2)
     with canvas(device) as draw:
-        draw.bitmap((0, 0), crop2, fill=5)
+        draw.bitmap((0, 0), pic, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
         draw.text((30, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
