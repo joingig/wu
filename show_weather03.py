@@ -129,6 +129,7 @@ except (ValueError, IOError)as e:
 #cat apixu.json | jq .location.tz_id  "Europe/Moscow"
 #cat apixu.json | jq .location.region "Moscow City"
 #cat apixu.json | jq .current.condition.text
+#cat apixu.json | jq .current.is_day
 
 location = parsed_json['location']["tz_id"]
 last_upd = parsed_json['current']["last_updated"]
@@ -138,9 +139,15 @@ temp_c = parsed_json['current']["temp_c"]
 wdes = parsed_json['current']['condition']["text"]
 img_url = parsed_json['current']['condition']["icon"]
 wcode = parsed_json['current']['condition']["code"]
+is_day = parsed_json['current']["is_day"]
+
+#print "is_day is:"+str(is_day)
 
 #img_a = img_url.split("/")[-1]
-sky_img = path.basename(img_url) 
+if is_day:
+    sky_img = "day"+path.basename(img_url) 
+else:
+    sky_img = "night"+path.basename(img_url)
 
 if not path.isfile(sky_img):
     print "Download %s" % (sky_img)
