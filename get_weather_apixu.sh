@@ -1,7 +1,7 @@
 #!/bin/bash
 
-wuhome=/root/wu
-#wuhome=/home/tazz/wu
+#wuhome=/root/wu
+export wuhome=/home/tazz/wu
 key=$wuhome/apixu.key
 days=2
 

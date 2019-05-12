@@ -10,11 +10,14 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ = False 
-if _debug_:
-    wuhome = "/home/tazz/wu"
-else:
-    wuhome = "/root/wu"
+_debug_ = True
+#if _debug_:
+#    wuhome = "/home/tazz/wu"
+#else:
+#    wuhome = "/root/wu"
+
+wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
+
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -72,7 +75,7 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.03 with WWO API')
+arguments = docopt(__doc__, version='0.05 with apixu API')
 if _debug_:
     print arguments
 print "[*] Startup ok"
@@ -145,7 +148,7 @@ is_day = parsed_json['current']["is_day"]
 
 #img_a = img_url.split("/")[-1]
 if is_day:
-    sky_img = "day"+path.basename(img_url) 
+    sky_img = "day"+path.basename(img_url)
 else:
     sky_img = "night"+path.basename(img_url)
 
