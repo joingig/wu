@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#wuhome=/root/wu
-export wuhome=/home/tazz/wu
+export wuhome=/root/wu
+#export wuhome=/home/tazz/wu
 key=$wuhome/apixu.key
 days=2
 
@@ -17,6 +17,7 @@ printf "key : %s\n" $wkey
 python -c 'import sys, json, os; wuhome = os.environ.get("wuhome","/root/wu"); data_f = open(wuhome+"/apixu.json","r"); js_obj = json.load(data_f); print js_obj;'
 
 if [ $? -eq 0 ]; then
+    /usr/bin/jq . < $wuhome/apixu.json
     printf "No errors\n"
     exit 0;
 fi
