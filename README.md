@@ -1,7 +1,7 @@
 ## RPi weather station
 ### Getting forecast part
 First of, i stop using  [Weather Underground](https://www.wunderground.com/weather/api/d/docs) API because IBM have a plane to close free API, and now all Python code based on [Apixu Weather API](https://www.apixu.com/api.aspx). Apixu API dont have any [PWS](https://www.wunderground.com/weatherstation/overview.asp) analog , and now all PWS code removed. 
-All Weather Underground legacy code you can find in  in show_weather01.py file, and working tree file now show_weather03.py.
+All Weather Underground legacy code you can find in  in [show_weather01.py](show_weather01.py) file, and working tree file now [show_weather03.py](show_weather03.py).
 
 SSD1306 driven with [LUMA](https://github.com/rm-hull/luma.oled) library with little modification (don't clear display after app close)
 
