@@ -7,7 +7,7 @@ SSD1306 driven with [LUMA](https://github.com/rm-hull/luma.oled) library with li
 
 ### setup
 
-Put yours [Weatherstack key api](https://www.wunderground.com/weather/api/d/docs) to **weatherstack.key** file.
+Put yours [Weatherstack key api](https://weatherstack.com/documentation) to **weatherstack.key** file.
 
 Add periodic task for PWS data refresh in you crontab as:
 ```sh
