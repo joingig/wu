@@ -77,7 +77,7 @@ if not _debug_:
     serial = i2c(port=1, address=0x3C)
     device = ssd1306(serial)
     font = ImageFont.load_default()
-    font_ttf30 = ImageFont.truetype(wuhome+"/luma/examples/fonts/C&C Red Alert [INET].ttf", 30)
+    font_ttf30 = ImageFont.truetype(wuhome+"/luma/examples/fonts/C&C Red Alert [INET].ttf", 31)
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
@@ -170,6 +170,7 @@ if not _debug_:
     sleep(1)
 
 print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C." % (hours, minutes, location, temp_c, wdes, feelslike_c, )
+print "[*] Weather updated at %s" % (last_upd)
 log.syslog("Weather updated at "+last_upd)
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
@@ -182,7 +183,7 @@ if not _debug_:
 
     pix = data[5]
     #(197, 197, 197, 255)
-    print pic_a.mode
+    #print pic_a.mode
 
     newData = []
     for item in data:
@@ -194,12 +195,9 @@ if not _debug_:
     pic_a.putdata(newData)
     pic_a.save("wu"+img_a, "PNG")
     
-    #sys.exit()
-
     with canvas(device) as draw:
         draw.bitmap((0, 0), pic_a, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
-        draw.text((30, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
-
+        draw.text((45, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
 #http://jsonviewer.stack.hu
