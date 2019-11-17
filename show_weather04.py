@@ -1,16 +1,20 @@
 """Usage:
-  show_weather01.py
-  show_weather01.py night
-  show_weather01.py -h | --help | --version
+  show_weather04.py
+  show_weather04.py night
+  show_weather04.py -h | --help | --version
+  show_weather04.py --noipshow | --noip | -noip | --skipip | -skipip
+
 
 Options:
   -h --help                show this help message and exit
   --version                show version and exit
+  --noipshow               skip ip cfg show
+
 """
 
 #maximum spaghetti code below
 
-_debug_ = True
+_debug_ = False
 #if _debug_:
 #    wuhome = "/home/tazz/wu"
 #else:
@@ -29,6 +33,8 @@ data_src = "weatherstack.json"
 import json
 import sys
 import pickle
+import socket
+import psutil
 import logging
 import syslog as log
 from urllib2 import urlopen, URLError
@@ -75,7 +81,7 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.07 with Weatherstack API')
+arguments = docopt(__doc__, version='0.010 with Weatherstack API')
 if _debug_:
     print arguments
 print "[*] Startup ok"
@@ -102,6 +108,23 @@ if internet_on():
 else:
     time_and_exit("We are offline. Exiting.")
 
+if_l = psutil.net_if_addrs().keys()
+if_a = psutil.net_if_addrs()
+print "[**] Avalable network interfaces %s" % (if_l)
+
+if not _debug_:
+    with canvas(device) as draw:
+        draw.text((0, 0), '__ IP CFG __', font=font, fill="gray")
+        for key in if_l:
+            print "key %s" % (key)
+            if "wlan" in key.lower():
+                print "[**] found wlan %s %s" % (key, if_a[key][0].address)
+                draw.text((00, 20), if_a[key][0].address, font=font, fill="gray")
+            if "eth" in key.lower():
+                print "[**] found ether %s %s" % (key, if_a[key][0].address)
+                draw.text((00,30), if_a[key][0].address, font=font,fill="gray")
+    sleep(2)
+
 pwd = getcwd()
 if pwd != wuhome:
     chdir(wuhome)
@@ -123,20 +146,8 @@ try:
 except (ValueError, IOError)as e:
     time_and_exit("[**] Error load JSON object. Exiting.")
 
-#cat apixu.json | jq .forecast.forecastday
-#cat apixu.json | jq .current.feelslike_c
-#cat apixu.json | jq .current.temp_c
-#cat apixu.json | jq .current.last_updated
-#cat apixu.json | jq .current.condition.code
-#cat apixu.json | jq .current.condition.icon
-#cat apixu.json | jq .location.tz_id  "Europe/Moscow"
-#cat apixu.json | jq .location.region "Moscow City"
-#cat apixu.json | jq .current.condition.text
-#cat apixu.json | jq .current.is_day
-
 location = parsed_json['location']["timezone_id"]
 last_upd = parsed_json['current']["observation_time"]
-
 feelslike_c = parsed_json['current']["feelslike"]
 temp_c = parsed_json['current']["temperature"]
 wdes = parsed_json['current']['weather_descriptions'][0]
@@ -144,8 +155,8 @@ img_url = parsed_json['current']['weather_icons'][0]
 #wcode = parsed_json['current']['condition']["code"]
 is_day = parsed_json['current']["is_day"]
 
-#print "[*] img url is {}".format(img_url)
-#print "[*] Is day?: {}".format(is_day)
+print "[**] img url is {}".format(img_url)
+print "[**] Is day?: {}".format(is_day)
 
 img_a = img_url.split("/")[-1]
 
@@ -164,15 +175,31 @@ log.syslog("Weather updated at "+last_upd)
 pickle.dump(settings, open(settings['fname'], "wb"))
 
 if not _debug_:
-    pic = Image.open(sky_img).resize((50,50))
-    #pixcut = 9
-    #crop = pic.crop((pixcut, pixcut, pic.size[0]-pixcut, pic.size[1]-pixcut))
+    pic = Image.open(img_a).resize((50,50))
+    pic_a = pic.convert("RGBA")
+
+    data = pic_a.getdata()
+
+    pix = data[5]
+    #(197, 197, 197, 255)
+    print pic_a.mode
+
+    newData = []
+    for item in data:
+        if item[0] == 197 and item[1] == 197 and item[2] == 197:
+            newData.append((255, 255, 255, 0))
+        else:
+            newData.append(item)
+
+    pic_a.putdata(newData)
+    pic_a.save("wu"+img_a, "PNG")
+    
+    #sys.exit()
+
     with canvas(device) as draw:
-        draw.bitmap((0, 0), pic, fill=5)
+        draw.bitmap((0, 0), pic_a, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
         draw.text((30, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
-#raw_input("Press Enter to continue...")
-#device.cleanup()
 
 #http://jsonviewer.stack.hu
