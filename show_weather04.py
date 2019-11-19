@@ -3,23 +3,19 @@
   show_weather04.py night
   show_weather04.py -h | --help | --version
   show_weather04.py --noipshow | --noip | -noip | --skipip | -skipip
+  show_weather04.py --debug
 
 
 Options:
   -h --help                show this help message and exit
   --version                show version and exit
   --noipshow               skip ip cfg show
-
+  --debug                  show debug info
 """
 
 #maximum spaghetti code below
 
 _debug_ = False
-#if _debug_:
-#    wuhome = "/home/tazz/wu"
-#else:
-#    wuhome = "/root/wu"
-
 #wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
 wuhome = "/home/tazz/wu" 
 
@@ -109,12 +105,16 @@ if internet_on():
 else:
     time_and_exit("We are offline. Exiting.")
 
+if arguments['--debug']:
+    print "[*] Debug is on"
+
 if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
 print "[**] Avalable network interfaces %s" % (if_l)
 
 if arguments['--noipshow']:
     print "no ip given"
+
 if not _debug_:
     with canvas(device) as draw:
         draw.text((0, 0), '__ IP CFG __', font=font, fill="gray")
