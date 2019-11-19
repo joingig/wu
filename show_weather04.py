@@ -20,7 +20,8 @@ _debug_ = False
 #else:
 #    wuhome = "/root/wu"
 
-wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
+#wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
+wuhome = "/home/tazz/wu" 
 
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
@@ -81,7 +82,7 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-arguments = docopt(__doc__, version='0.010 with Weatherstack API')
+arguments = docopt(__doc__, version='0.011 with Weatherstack API')
 if _debug_:
     print arguments
 print "[*] Startup ok"
@@ -112,11 +113,13 @@ if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
 print "[**] Avalable network interfaces %s" % (if_l)
 
+if arguments['--noipshow']:
+    print "no ip given"
 if not _debug_:
     with canvas(device) as draw:
         draw.text((0, 0), '__ IP CFG __', font=font, fill="gray")
         for key in if_l:
-            print "key %s" % (key)
+            #print "key %s" % (key)
             if "wlan" in key.lower():
                 print "[**] found wlan %s %s" % (key, if_a[key][0].address)
                 draw.text((00, 20), if_a[key][0].address, font=font, fill="gray")
@@ -175,29 +178,39 @@ log.syslog("Weather updated at "+last_upd)
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
 
+if wdes == u'mist' or wdes == u'fog' or wdes == u'Mist' or wdes == u'Fog':
+    img_a = 'wu_noun_fog00.png'
+    print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
+    #pic_test = Image.open('wu_noun_fog00.png')
+
 if not _debug_:
-    pic = Image.open(img_a).resize((50,50))
+    #pic = Image.open(img_a).resize((50,50))
+    pic = Image.open(img_a)
     pic_a = pic.convert("RGBA")
 
     data = pic_a.getdata()
 
     pix = data[5]
+    print "[**] pix data: {}".format(pix)
+
     #(197, 197, 197, 255)
+    #(147, 147, 147, 255)
     #print pic_a.mode
 
     newData = []
     for item in data:
-        if item[0] == 197 and item[1] == 197 and item[2] == 197:
+        #if item[0] == 197 and item[1] == 197 and item[2] == 197:
+        if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
             newData.append((255, 255, 255, 0))
         else:
             newData.append(item)
-
+    
     pic_a.putdata(newData)
     pic_a.save("wu"+img_a, "PNG")
     
     with canvas(device) as draw:
         draw.bitmap((0, 0), pic_a, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
-        draw.text((45, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
+        draw.text((50, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
 #http://jsonviewer.stack.hu
