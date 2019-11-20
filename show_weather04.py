@@ -211,6 +211,6 @@ if not _debug_:
     with canvas(device) as draw:
         draw.bitmap((0, 0), pic_a, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
-        draw.text((50, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
+        draw.text((60, 40), str(temp_c)+"`C", font=font_ttf30, fill="white")
 
 #http://jsonviewer.stack.hu
