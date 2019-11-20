@@ -12,6 +12,7 @@ def isLookstheSame (a, b, dev=10):
     return False
 
 img_a = 'wsymbol_0008_clear_sky_night.png'
+img_n = 'wu'+img_a
 
 #pic = Image.open(img_a).resize((50,50))
 pic = Image.open(img_a)
@@ -28,7 +29,7 @@ print "[**] pix data: {}".format(pix)
 newData = []
 for item in data:
     #print item
-    if isLookstheSame(pix, item, 5):
+    if isLookstheSame(pix, item, 13):
         print "Looks the same {} and {}".format(pix,item)
         newData.append((255, 255, 255, 0))
     else:
@@ -42,4 +43,5 @@ for item in data:
     #    newData.append(item)
 
 pic_a.putdata(newData)
-pic_a.save("wu"+img_a, "PNG")
+pic_a.save(img_n, "PNG")
+print "new file {} writed".format(img_n)
