@@ -39,7 +39,7 @@ from urllib import urlretrieve
 from time import localtime, sleep
 from os import getcwd, chdir, path
 from docopt import docopt
-from PIL import ImageFont, Image
+from PIL import ImageFont, Image, ImageFilter
 
 if not _debug_:
     from luma.core.serial import i2c
@@ -191,16 +191,23 @@ if not _debug_:
     data = pic_a.getdata()
 
     pix = data[5]
+    pix2 = data[30]
+    pix3 = data[64*5+25]
     print "[**] pix data: {}".format(pix)
+    print "[**] pix2 data: {}".format(pix2)
+    print "[**] pix3 data: {}".format(pix3)
+
 
     #(197, 197, 197, 255)
     #(147, 147, 147, 255)
+    #(64, 72, 145, 255)
     #print pic_a.mode
 
     newData = []
     for item in data:
         #if item[0] == 197 and item[1] == 197 and item[2] == 197:
-        if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
+        #if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
+        if item == pix or item == pix2 or item == pix3:
             newData.append((255, 255, 255, 0))
         else:
             newData.append(item)
