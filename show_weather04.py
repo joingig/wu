@@ -78,6 +78,17 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
+#fnk for image noise fight 
+def isLookstheSame (a, b, dev=10):
+    #print "a is {}".format(a)
+        #print "b is {}".format(b)
+
+#    print "a-b is {}".format(a-b)
+    if abs(a[0]-b[0]) < dev and abs(a[1]-b[1]) < dev and abs(a[2]-b[2]) < dev:
+        return True
+    return False
+
+
 arguments = docopt(__doc__, version='0.011 with Weatherstack API')
 if _debug_:
     print arguments
@@ -190,12 +201,9 @@ if not _debug_:
 
     data = pic_a.getdata()
 
+    #background start/etalon pixel
     pix = data[5]
-    pix2 = data[30]
-    pix3 = data[64*5+25]
     print "[**] pix data: {}".format(pix)
-    print "[**] pix2 data: {}".format(pix2)
-    print "[**] pix3 data: {}".format(pix3)
 
 
     #(197, 197, 197, 255)
@@ -205,12 +213,21 @@ if not _debug_:
 
     newData = []
     for item in data:
-        #if item[0] == 197 and item[1] == 197 and item[2] == 197:
-        #if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
-        if item == pix or item == pix2 or item == pix3:
+        #fight with noise background begin
+        if isLookstheSame(pix, item, 13):
+            #print "Looks the same {} and {}".format(pix,item)
             newData.append((255, 255, 255, 0))
         else:
+            #print "Looks like {} and {} diff".format(pix,item)
             newData.append(item)
+        
+        #old background replace routine
+        #if item[0] == 197 and item[1] == 197 and item[2] == 197:
+        #if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
+        #if item == pix or item == pix2 or item == pix3:
+        #    newData.append((255, 255, 255, 0))
+        #else:
+        #    newData.append(item)
     
     pic_a.putdata(newData)
     pic_a.save("wu"+img_a, "PNG")
