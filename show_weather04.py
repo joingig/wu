@@ -96,15 +96,18 @@ print "[*] Startup ok"
 
 time = localtime()
 
-if time.tm_hour < 10:
-    hours = "0"+str(time.tm_hour)
-else:
-    hours = str(time.tm_hour)
+hours = "0"+str(time.tm_hour) if time.tm_hour < 10 else str(time.tm_hour) 
+minutes = "0"+str(time.tm_min) if time.tm_min < 10 else str(time.tm_min)
 
-if time.tm_min < 10:
-    minutes = "0"+str(time.tm_min)
-else:
-    minutes = str(time.tm_min)
+#if time.tm_hour < 10:
+#    hours = "0"+str(time.tm_hour)
+#else:
+#    hours = str(time.tm_hour)
+#minutes = "0"+str(time.tm_min) if time.tm_min < 10 else tr(time.tm_min)
+#if time.tm_min < 10:
+#    minutes = "0"+str(time.tm_min)
+#else:
+#    minutes = str(time.tm_min)
 
 #night mode between 01 and 06 am / we not showing weather / only time
 #if time.tm_hour > 0 and time.tm_hour < 6:
