@@ -89,7 +89,7 @@ def isLookstheSame (a, b, dev=10):
     return False
 
 
-arguments = docopt(__doc__, version='0.011 with Weatherstack API')
+arguments = docopt(__doc__, version='0.012 with Weatherstack API')
 if _debug_:
     print arguments
 print "[*] Startup ok"
@@ -178,6 +178,43 @@ if not path.isfile(img_a):
     print "Download %s" % (img_a)
     urlretrieve(img_url, img_a)
 
+    #start converting image 2 frenly format
+    #pic = Image.open(img_a).resize((50,50))
+    pic = Image.open(img_a)
+    pic_a = pic.convert("RGBA")
+    data = pic_a.getdata()
+    
+    #pix is a background start/etalon pixel
+    pix = data[5]
+    print "[**] pix data: {}".format(pix)
+    
+    #(197, 197, 197, 255)
+    #(147, 147, 147, 255)
+    #(64, 72, 145, 255)
+    #print pic_a.mode
+    
+    newData = []
+    for item in data:
+        #fight with noise background begin
+        if isLookstheSame(pix, item, 13):
+            #print "Looks the same {} and {}".format(pix,item)
+            newData.append((255, 255, 255, 0))
+        else:
+            #print "Looks like {} and {} diff".format(pix,item)
+            newData.append(item)
+    
+    #old background replace routine
+    #if item[0] == 197 and item[1] == 197 and item[2] == 197:
+    #if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
+    #if item == pix or item == pix2 or item == pix3:
+    #    newData.append((255, 255, 255, 0))
+    #else:
+    #    newData.append(item)
+    pic_a.putdata(newData)
+    pic_a.save("wu"+img_a, "PNG")
+    #end of converting routine 
+
+
 if not _debug_:
     with canvas(device) as draw:
         draw.text((00, 55), last_upd.replace('Last Updated on ', ''), font=font, fill="gray")
@@ -192,46 +229,10 @@ pickle.dump(settings, open(settings['fname'], "wb"))
 if wdes == u'mist' or wdes == u'fog' or wdes == u'Mist' or wdes == u'Fog':
     img_a = 'wu_noun_fog00.png'
     print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
-    #pic_test = Image.open('wu_noun_fog00.png')
+
+pic_a = Image.open('wu'+img_a)
 
 if not _debug_:
-    #pic = Image.open(img_a).resize((50,50))
-    pic = Image.open(img_a)
-    pic_a = pic.convert("RGBA")
-
-    data = pic_a.getdata()
-
-    #background start/etalon pixel
-    pix = data[5]
-    print "[**] pix data: {}".format(pix)
-
-
-    #(197, 197, 197, 255)
-    #(147, 147, 147, 255)
-    #(64, 72, 145, 255)
-    #print pic_a.mode
-
-    newData = []
-    for item in data:
-        #fight with noise background begin
-        if isLookstheSame(pix, item, 13):
-            #print "Looks the same {} and {}".format(pix,item)
-            newData.append((255, 255, 255, 0))
-        else:
-            #print "Looks like {} and {} diff".format(pix,item)
-            newData.append(item)
-        
-        #old background replace routine
-        #if item[0] == 197 and item[1] == 197 and item[2] == 197:
-        #if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
-        #if item == pix or item == pix2 or item == pix3:
-        #    newData.append((255, 255, 255, 0))
-        #else:
-        #    newData.append(item)
-    
-    pic_a.putdata(newData)
-    pic_a.save("wu"+img_a, "PNG")
-    
     with canvas(device) as draw:
         draw.bitmap((0, 0), pic_a, fill=5)
         draw.text((60, 0), hours+":"+minutes, font=font_ttf30, fill="gray")
