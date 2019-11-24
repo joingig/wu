@@ -3,10 +3,13 @@
   show_weather04.py night
   show_weather04.py -h | --help | --version
   show_weather04.py --noipshow | --noip | -noip | --skipip | -skipip
+  show_weather04.py realtemp
   show_weather04.py --debug
 
 
 Options:
+    night                  night mode, print time and exit
+    realtemp               using temp_c real temperature variable instead feelslike_c
   -h --help                show this help message and exit
   --version                show version and exit
   --noipshow               skip ip cfg show
@@ -81,13 +84,11 @@ if not _debug_:
 #fnk for image noise fight 
 def isLookstheSame (a, b, dev=10):
     #print "a is {}".format(a)
-        #print "b is {}".format(b)
-
-#    print "a-b is {}".format(a-b)
+    #print "b is {}".format(b)
+    #print "a-b is {}".format(a-b)
     if abs(a[0]-b[0]) < dev and abs(a[1]-b[1]) < dev and abs(a[2]-b[2]) < dev:
         return True
     return False
-
 
 arguments = docopt(__doc__, version='0.012 with Weatherstack API')
 if _debug_:
@@ -117,7 +118,7 @@ if arguments['night']:
 if internet_on():
     print "[*] Online"
 else:
-    time_and_exit("We are offline. Exiting.")
+    time_and_exit("[*] We are offline. Exiting.")
 
 if arguments['--debug']:
     print "[*] Debug is on"
@@ -232,6 +233,13 @@ pickle.dump(settings, open(settings['fname'], "wb"))
 if wdes == u'mist' or wdes == u'fog' or wdes == u'Mist' or wdes == u'Fog':
     img_a = 'wu_noun_fog00.png'
     print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
+
+
+if arguments['realtemp']:
+    print "[*] realtemp is on, using temp_c {} for temperaure".format(temp_c)
+else:
+    print "[*] Default mode, using feelslike_c {} for temperature".format(feelslike_c)
+    temp_c = feelslike_c
 
 pic_a = Image.open('wu'+img_a)
 
