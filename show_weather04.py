@@ -230,7 +230,8 @@ log.syslog("Weather updated at "+last_upd)
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
 
-if wdes == u'mist' or wdes == u'fog' or wdes == u'Mist' or wdes == u'Fog':
+#if wdes == u'mist' or wdes == u'fog' or wdes == u'Mist' or wdes == u'Fog':
+if u'Mist' in wdes or u'Fog' in wdes:
     img_a = 'wu_noun_fog00.png'
     print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
 
