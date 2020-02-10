@@ -18,9 +18,9 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ = False
+_debug_ = True
 #wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
-wuhome = "/home/tazz/wu" 
+wuhome = "/home/tazz/wu"
 
 settings = {'cpws':"ISVIBLOV2",
             'hourly_h':0,
@@ -29,6 +29,7 @@ settings = {'cpws':"ISVIBLOV2",
            }
 
 data_src = "weatherstack.json"
+data_array = wuhome+"/dataa.txt"
 
 import json
 import sys
@@ -36,7 +37,7 @@ import pickle
 import socket
 import psutil
 import logging
-import syslog as log
+#import syslog as log
 from urllib2 import urlopen, URLError
 from urllib import urlretrieve
 from time import localtime, sleep
@@ -49,6 +50,23 @@ if not _debug_:
     from luma.core.render import canvas
     from luma.oled.device import ssd1306
 
+logger = logging.getLogger(__file__)
+
+c_handler = logging.StreamHandler()
+c_handler.setLevel(logging.WARNING)
+c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+c_handler.setFormatter(c_format)
+logger.addHandler(c_handler)
+
+f_handler = logging.FileHandler(wuhome+'/wu.log')
+f_handler.setLevel(logging.ERROR)
+f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+f_handler.setFormatter(f_format)
+logger.addHandler(f_handler)
+
+#logger.warning('this is warning')
+#logger.error('this is error')
+
 def internet_on():
     """
     Check Internet connection.
@@ -60,7 +78,8 @@ def internet_on():
         except URLError as err:
             pass
             print "internet check fail, {} try".format(m)
-            log.syslog("Internet connection check failed")
+            #log.syslog("Internet connection check failed")
+            if _debug_: logger.error("Internet connection check failed")
         continue
     return False
 
@@ -81,7 +100,7 @@ if not _debug_:
     font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
-#fnk for image noise fight 
+#fnk for image noise fight
 def isLookstheSame (a, b, dev=10):
     #print "a is {}".format(a)
     #print "b is {}".format(b)
@@ -90,25 +109,15 @@ def isLookstheSame (a, b, dev=10):
         return True
     return False
 
-arguments = docopt(__doc__, version='0.012 with Weatherstack API')
+arguments = docopt(__doc__, version='0.013 with Weatherstack API')
 if _debug_:
     print arguments
 print "[*] Startup ok"
 
 time = localtime()
 
-hours = "0"+str(time.tm_hour) if time.tm_hour < 10 else str(time.tm_hour) 
+hours = "0"+str(time.tm_hour) if time.tm_hour < 10 else str(time.tm_hour)
 minutes = "0"+str(time.tm_min) if time.tm_min < 10 else str(time.tm_min)
-
-#if time.tm_hour < 10:
-#    hours = "0"+str(time.tm_hour)
-#else:
-#    hours = str(time.tm_hour)
-#minutes = "0"+str(time.tm_min) if time.tm_min < 10 else tr(time.tm_min)
-#if time.tm_min < 10:
-#    minutes = "0"+str(time.tm_min)
-#else:
-#    minutes = str(time.tm_min)
 
 #night mode between 01 and 06 am / we not showing weather / only time
 #if time.tm_hour > 0 and time.tm_hour < 6:
@@ -121,11 +130,14 @@ else:
     time_and_exit("[*] We are offline. Exiting.")
 
 if arguments['--debug']:
-    print "[*] Debug is on"
+    #print "[*] Debug is on"
+    _debug_ = True
+    logger.warning("Debug is on")
 
 if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
-print "[**] Avalable network interfaces %s" % (if_l)
+#print "[**] Avalable network interfaces %s" % (if_l)
+if _debug_: logger.warning("[**] Avalable network interfaces %s" % (if_l))
 
 if arguments['--noipshow']:
     print "no ip given"
@@ -137,9 +149,11 @@ if not _debug_:
             #print "key %s" % (key)
             if "wlan" in key.lower():
                 print "[**] found wlan %s %s" % (key, if_a[key][0].address)
+                #if _debug_:  logger.warning("[**] found wlan %s %s" % (key, if_a[key][0].msgaddress))
                 draw.text((00, 20), if_a[key][0].address, font=font, fill="gray")
-            if "eth" in key.lower():
+            if "eth" in key.lower() or "venet" in key.lower():
                 print "[**] found ether %s %s" % (key, if_a[key][0].address)
+                #if _debug_:  logger.warning("[**] found ether %s %s" % (key, if_a[key][0].msgaddress))
                 draw.text((00,30), if_a[key][0].address, font=font,fill="gray")
     sleep(2)
 
@@ -152,8 +166,10 @@ if pwd != wuhome:
 try:
     settings = pickle.load(open(settings['fname'], "rb"))
 except IOError as e:
-    print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings['fname'])
-    print "[*] creating {0}".format(settings['fname'])
+    #print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings['fname'])
+    #print "[*] creating {0}".format(settings['fname'])
+    logger.error("I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings['fname']))
+    logger.error("[*] creating {0}".format(settings['fname']))
     settings['cpws'] = None
     pickle.dump(settings, open(settings['fname'], "wb"))
 
@@ -162,6 +178,7 @@ try:
         parsed_json = json.load(weather_file)
         weather_file.close()
 except (ValueError, IOError)as e:
+    logger.error("Error load JSON object.")
     time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']["timezone_id"]
@@ -173,8 +190,10 @@ img_url = parsed_json['current']['weather_icons'][0]
 #wcode = parsed_json['current']['condition']["code"]
 is_day = parsed_json['current']["is_day"]
 
-print "[**] img url is {}".format(img_url)
-print "[**] Is day?: {}".format(is_day)
+#print "[**] img url is {}".format(img_url)
+#print "[**] Is day?: {}".format(is_day)
+if _debug_: logger.warning("Img url is {}".format(img_url))
+if _debug_: logger.warning("Is day?: {}".format(is_day))
 
 img_a = img_url.split("/")[-1]
 
@@ -187,16 +206,16 @@ if not path.isfile(img_a):
     pic = Image.open(img_a)
     pic_a = pic.convert("RGBA")
     data = pic_a.getdata()
-    
+
     #pix is a background start/etalon pixel
     pix = data[5]
     print "[**] pix data: {}".format(pix)
-    
+
     #(197, 197, 197, 255)
     #(147, 147, 147, 255)
     #(64, 72, 145, 255)
     #print pic_a.mode
-    
+
     newData = []
     for item in data:
         #fight with noise background begin
@@ -206,7 +225,7 @@ if not path.isfile(img_a):
         else:
             #print "Looks like {} and {} diff".format(pix,item)
             newData.append(item)
-    
+
     #old background replace routine
     #if item[0] == 197 and item[1] == 197 and item[2] == 197:
     #if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
@@ -216,17 +235,18 @@ if not path.isfile(img_a):
     #    newData.append(item)
     pic_a.putdata(newData)
     pic_a.save("wu"+img_a, "PNG")
-    #end of converting routine 
-
+    #end of converting routine
 
 if not _debug_:
     with canvas(device) as draw:
         draw.text((00, 55), last_upd.replace('Last Updated on ', ''), font=font, fill="gray")
     sleep(1)
 
-print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C." % (hours, minutes, location, temp_c, wdes, feelslike_c, )
-print "[*] Weather updated at %s" % (last_upd)
-log.syslog("Weather updated at "+last_upd)
+#print "%s:%s Current temperature in %s is: %s`C  %s, feels like: %s`C." % (hours, minutes, location, temp_c, wdes, feelslike_c, )
+logger.warning("Current temperature in %s is: %s`C  %s, feels like: %s`C." % ( location, temp_c, wdes, feelslike_c))
+#print "[*] Weather updated at %s" % (last_upd)
+#log.syslog("Weather updated at "+last_upd)
+logger.warning("Weather updated at {}".format(last_upd))
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
 
