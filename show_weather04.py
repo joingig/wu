@@ -18,7 +18,7 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ = True
+_debug_ = False 
 #wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
 wuhome = "/home/tazz/wu"
 
@@ -54,7 +54,7 @@ logger = logging.getLogger(__file__)
 
 c_handler = logging.StreamHandler()
 c_handler.setLevel(logging.WARNING)
-c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+c_format = logging.Formatter('%(levelname)s - %(message)s')
 c_handler.setFormatter(c_format)
 logger.addHandler(c_handler)
 
@@ -64,8 +64,16 @@ f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message
 f_handler.setFormatter(f_format)
 logger.addHandler(f_handler)
 
-#logger.warning('this is warning')
-#logger.error('this is error')
+#i_handler = logging.StreamHandler()
+#i_handler.setLevel(logging.DEBUG)
+#i_format = logging.Formatter('%(levelname)s - %(message)s')
+#i_handler.setFormatter(i_format)
+#logger.addHandler(i_handler)
+
+if _debug_:
+#    logger.debug('this is debug')
+    logger.warning('this is warning')
+    logger.error('this is error')
 
 def internet_on():
     """
@@ -73,13 +81,13 @@ def internet_on():
     """
     for m in range(1, 4):
         try:
-            urlopen('https://ya.ru', timeout=5)
+            urlopen('https://ya.ru', timeout=50)
             return True
         except URLError as err:
             pass
             print "internet check fail, {} try".format(m)
             #log.syslog("Internet connection check failed")
-            if _debug_: logger.error("Internet connection check failed")
+            logger.error("Internet connection check failed")
         continue
     return False
 
@@ -112,6 +120,7 @@ def isLookstheSame (a, b, dev=10):
 arguments = docopt(__doc__, version='0.013 with Weatherstack API')
 if _debug_:
     print arguments
+
 print "[*] Startup ok"
 
 time = localtime()
@@ -127,6 +136,10 @@ if arguments['night']:
 if internet_on():
     print "[*] Online"
 else:
+    time_and_exit("[*] We are offline. Exiting.")
+
+#little buggy here docopt haz buildin -h help handler
+if arguments['--help']:
     time_and_exit("[*] We are offline. Exiting.")
 
 if arguments['--debug']:
