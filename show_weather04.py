@@ -18,18 +18,18 @@ Options:
 
 #maximum spaghetti code below
 
-_debug_ = False 
+#_debug_ = False
 #wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
-wuhome = "/home/tazz/wu"
 
-settings = {'cpws':"ISVIBLOV2",
+settings = {'debug':"False",
+            'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
-            'pwsfile':"pws_list.txt"
+            'pwsfile':"pws_list.txt",
+            'wuhome':"/home/tazz/wu",
+            'data_json':"weatherstack.json",
+            'data_array':"dataa.txt"
            }
-
-data_src = "weatherstack.json"
-data_array = wuhome+"/dataa.txt"
 
 import json
 import sys
@@ -45,11 +45,6 @@ from os import getcwd, chdir, path
 from docopt import docopt
 from PIL import ImageFont, Image, ImageFilter
 
-if not _debug_:
-    from luma.core.serial import i2c
-    from luma.core.render import canvas
-    from luma.oled.device import ssd1306
-
 logger = logging.getLogger(__file__)
 
 c_handler = logging.StreamHandler()
@@ -58,7 +53,7 @@ c_format = logging.Formatter('%(levelname)s - %(message)s')
 c_handler.setFormatter(c_format)
 logger.addHandler(c_handler)
 
-f_handler = logging.FileHandler(wuhome+'/wu.log')
+f_handler = logging.FileHandler(settings['wuhome']+'/wu.log')
 f_handler.setLevel(logging.ERROR)
 f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 f_handler.setFormatter(f_format)
@@ -69,6 +64,23 @@ logger.addHandler(f_handler)
 #i_format = logging.Formatter('%(levelname)s - %(message)s')
 #i_handler.setFormatter(i_format)
 #logger.addHandler(i_handler)
+
+
+arguments = docopt(__doc__, version='0.014 with Weatherstack API')
+
+if arguments['--debug']:
+    _debug_ = True
+    logger.warning("Debug is on")
+    settings['debug']="True"
+    print arguments
+else:
+    _debug_ = False
+#    logger.warning("Debug is off")
+
+if not _debug_:
+    from luma.core.serial import i2c
+    from luma.core.render import canvas
+    from luma.oled.device import ssd1306
 
 if _debug_:
 #    logger.debug('this is debug')
@@ -85,7 +97,7 @@ def internet_on():
             return True
         except URLError as err:
             pass
-            print "internet check fail, {} try".format(m)
+            if _debug_: print "internet check fail, {} try".format(m)
             #log.syslog("Internet connection check failed")
             logger.error("Internet connection check failed")
         continue
@@ -117,9 +129,9 @@ def isLookstheSame (a, b, dev=10):
         return True
     return False
 
-arguments = docopt(__doc__, version='0.013 with Weatherstack API')
-if _debug_:
-    print arguments
+#arguments = docopt(__doc__, version='0.013 with Weatherstack API')
+#if _debug_:
+#    print arguments
 
 print "[*] Startup ok"
 
@@ -139,13 +151,13 @@ else:
     time_and_exit("[*] We are offline. Exiting.")
 
 #little buggy here docopt haz buildin -h help handler
-if arguments['--help']:
-    time_and_exit("[*] We are offline. Exiting.")
+#if arguments['--help']:
+#    time_and_exit("[*] We are offline. Exiting.")
 
-if arguments['--debug']:
-    #print "[*] Debug is on"
-    _debug_ = True
-    logger.warning("Debug is on")
+#if arguments['--debug']:
+#   print "[*] Debug is on"
+#    _debug_ = True
+#    logger.warning("Debug is on")
 
 if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
@@ -170,10 +182,10 @@ if not _debug_:
                 draw.text((00,30), if_a[key][0].address, font=font,fill="gray")
     sleep(2)
 
-pwd = getcwd()
-if pwd != wuhome:
-    chdir(wuhome)
-    print getcwd()
+#pwd = getcwd()
+if getcwd() != settings['wuhome']:
+    chdir(settings['wuhome'])
+    if _debug__: print getcwd()
 
 #load settings
 try:
@@ -187,11 +199,11 @@ except IOError as e:
     pickle.dump(settings, open(settings['fname'], "wb"))
 
 try:
-    with open(data_src) as weather_file:
+    with open(settings['data_json']) as weather_file:
         parsed_json = json.load(weather_file)
-        weather_file.close()
+#        weather_file.close()
 except (ValueError, IOError)as e:
-    logger.error("Error load JSON object.")
+    logger.error("Error load JSON object in {}.".format(settings['data_json']))
     time_and_exit("[**] Error load JSON object. Exiting.")
 
 location = parsed_json['location']["timezone_id"]
