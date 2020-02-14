@@ -33,6 +33,7 @@ settings = {'debug':"False",
 
 import json
 import sys
+import csv
 import pickle
 import socket
 import psutil
@@ -43,7 +44,7 @@ from urllib import urlretrieve
 from time import localtime, sleep
 from os import getcwd, chdir, path
 from docopt import docopt
-from PIL import ImageFont, Image, ImageFilter
+from PIL import ImageFont, Image, ImageFilter, ImageFile
 
 logger = logging.getLogger(__file__)
 
@@ -83,7 +84,6 @@ if not _debug_:
     from luma.oled.device import ssd1306
 
 if _debug_:
-#    logger.debug('this is debug')
     logger.warning('this is warning')
     logger.error('this is error')
 
@@ -122,16 +122,9 @@ if not _debug_:
 
 #fnk for image noise fight
 def isLookstheSame (a, b, dev=10):
-    #print "a is {}".format(a)
-    #print "b is {}".format(b)
-    #print "a-b is {}".format(a-b)
     if abs(a[0]-b[0]) < dev and abs(a[1]-b[1]) < dev and abs(a[2]-b[2]) < dev:
         return True
     return False
-
-#arguments = docopt(__doc__, version='0.013 with Weatherstack API')
-#if _debug_:
-#    print arguments
 
 print "[*] Startup ok"
 
@@ -162,7 +155,7 @@ else:
 if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
 #print "[**] Avalable network interfaces %s" % (if_l)
-if _debug_: logger.warning("[**] Avalable network interfaces %s" % (if_l))
+if _debug_: logger.warning("Avalable network interfaces %s" % (if_l))
 
 if arguments['--noipshow']:
     print "no ip given"
@@ -206,21 +199,51 @@ except (ValueError, IOError)as e:
     logger.error("Error load JSON object in {}.".format(settings['data_json']))
     time_and_exit("[**] Error load JSON object. Exiting.")
 
-location = parsed_json['location']["timezone_id"]
-last_upd = parsed_json['current']["observation_time"]
+#"datetime" "uv_index" "cloudcover" "humidity" "pressure" "temperature" "wind_speed" "wind_dir"
+location = parsed_json['location']['timezone_id']
+last_upd = parsed_json['current']['observation_time']
 feelslike_c = parsed_json['current']["feelslike"]
 temp_c = parsed_json['current']["temperature"]
 wdes = parsed_json['current']['weather_descriptions'][0]
 img_url = parsed_json['current']['weather_icons'][0]
-#wcode = parsed_json['current']['condition']["code"]
 is_day = parsed_json['current']["is_day"]
+uv_index = parsed_json['current']['uv_index']
+cloudcover = parsed_json['current']['cloudcover']
+humidity = parsed_json['current']['humidity']
+pressure = parsed_json['current']['pressure']
+wind_speed = parsed_json['current']['wind_speed']
+wind_dir = parsed_json['current']['wind_dir']
+datetime = parsed_json['location']['localtime']
 
-#print "[**] img url is {}".format(img_url)
-#print "[**] Is day?: {}".format(is_day)
+try:
+    with open(settings['data_array'], mode='ra') as f_da:
+        csv_data = csv.DictReader(f_da)
+        line_count = 0
+        for row in csv_data:
+            if _debug_:
+                print "line_count: {}".format(line_count)
+                print type(row)
+                print row
+
+            if line_count == 0:
+                print 'Column names are {}'.format(row)
+            #print f'\t{row["name"]} works in the {row["department"]} department, and was born in {row["birthday month"]}.'
+            #print '\t{} works in the {} department, and was born in {}.'.format(row["name"],row["department"],row["birthday month"])
+            line_count += 1
+        print 'Processed {} lines.'.format(line_count)
+except (ValueError, IOError)as e:
+    logger.error("Error load CSV file {}, {}. Creating new".format(settings['data_array']),e)
+    with open(settings['data_array'], mode='w') as f_da:
+        csv_new = csv.writer(f_da, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csv_new.writerow(['datetime','uv_index','cloudcover','humidity','pressure','temperature','wind_speed','wind_dir'])
+        csv_new.writerow([datetime,uv_index,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
+
 if _debug_: logger.warning("Img url is {}".format(img_url))
 if _debug_: logger.warning("Is day?: {}".format(is_day))
 
 img_a = img_url.split("/")[-1]
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 if not path.isfile(img_a):
     print "Download %s" % (img_a)
