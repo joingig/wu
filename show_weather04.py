@@ -217,9 +217,10 @@ wind_dir = parsed_json['current']['wind_dir']
 datetime = parsed_json['location']['localtime']
 
 #collect data and write
+fnames = ['datetime','uv_index','cloudcover','humidity','pressure','temperature','wind_speed','wind_dir']
 try:
     with open(settings['data_array'], mode='ra') as f_da:
-        csv_data = csv.DictReader(f_da)
+        csv_data = csv.DictWriter(f_da,fieldnames=fnames)
         line_count = 0
         for row in csv_data:
             if _debug_:
@@ -233,11 +234,16 @@ try:
             #print '\t{} works in the {} department, and was born in {}.'.format(row["name"],row["department"],row["birthday month"])
             line_count += 1
         print 'Processed {} lines.'.format(line_count)
+        print 'Write data'
+
+
+        csv_data = csv.DictWriter(f_da,fieldnames=fnames)
+        csv_data.writerow([datetime,uv_index,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
 except (ValueError, IOError)as e:
     logger.error("Error load CSV file {}, {}. Creating new".format(settings['data_array']),e)
     with open(settings['data_array'], mode='w') as f_da:
         csv_new = csv.writer(f_da, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        csv_new.writerow(['datetime','uv_index','cloudcover','humidity','pressure','temperature','wind_speed','wind_dir'])
+        csv_new.writerow(fnames)
         csv_new.writerow([datetime,uv_index,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
 
 if _debug_: logger.warning("Img url is {}".format(img_url))
