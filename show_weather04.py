@@ -114,8 +114,8 @@ if not _debug_:
     serial = i2c(port=1, address=0x3C)
     device = ssd1306(serial)
     font = ImageFont.load_default()
-    font_ttf30 = ImageFont.truetype(wuhome+"/luma/examples/fonts/C&C Red Alert [INET].ttf", 31)
-    font_ttf40 = ImageFont.truetype(wuhome+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
+    font_ttf30 = ImageFont.truetype(settings['wuhome']+"/luma/examples/fonts/C&C Red Alert [INET].ttf", 31)
+    font_ttf40 = ImageFont.truetype(settings['wuhome']+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
     #device.contrast(220)
 
 #fnk for image noise fight
@@ -220,7 +220,7 @@ datetime = parsed_json['location']['localtime']
 fnames = ['datetime','uv_index','cloudcover','humidity','pressure','temperature','wind_speed','wind_dir']
 try:
     with open(settings['data_array'], mode='ra') as f_da:
-        csv_data = csv.DictWriter(f_da,fieldnames=fnames)
+        csv_data = csv.DictReader(f_da,fieldnames=fnames)
         line_count = 0
         for row in csv_data:
             if _debug_:
@@ -240,7 +240,7 @@ try:
         csv_data = csv.DictWriter(f_da,fieldnames=fnames)
         csv_data.writerow([datetime,uv_index,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
 except (ValueError, IOError)as e:
-    logger.error("Error load CSV file {}, {}. Creating new".format(settings['data_array']),e)
+    logger.error("Error load CSV file {}, {}. Creating new".format(settings['data_array'],e))
     with open(settings['data_array'], mode='w') as f_da:
         csv_new = csv.writer(f_da, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         csv_new.writerow(fnames)
