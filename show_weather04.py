@@ -2,17 +2,16 @@
   show_weather04.py
   show_weather04.py night
   show_weather04.py -h | --help | --version
-  show_weather04.py --noipshow | --noip | -noip | --skipip | -skipip
-  show_weather04.py realtemp
+  show_weather04.py noip [--debug]
+  show_weather04.py realtemp [--debug]
   show_weather04.py --debug
 
-
 Options:
+    noip                   skip ip cfg show
     night                  night mode, print time and exit
-    realtemp               using temp_c real temperature variable instead feelslike_c
+    realtemp               switch between temp_c feelslike_c
   -h --help                show this help message and exit
   --version                show version and exit
-  --noipshow               skip ip cfg show
   --debug                  show debug info
 """
 
@@ -21,7 +20,8 @@ Options:
 #_debug_ = False
 #wuhome = "/home/tazz/wu" if _debug_ else "/root/wu"
 
-settings = {'debug':"False",
+settings = {'debug':False,
+            'realtemp':False,
             'cpws':"ISVIBLOV2",
             'hourly_h':0,
             'fname':"wu.pck",
@@ -38,7 +38,6 @@ import pickle
 import socket
 import psutil
 import logging
-#import syslog as log
 from urllib2 import urlopen, URLError
 from urllib import urlretrieve
 from time import localtime, sleep
@@ -65,7 +64,6 @@ logger.addHandler(f_handler)
 #i_format = logging.Formatter('%(levelname)s - %(message)s')
 #i_handler.setFormatter(i_format)
 #logger.addHandler(i_handler)
-
 
 arguments = docopt(__doc__, version='0.014 with Weatherstack API')
 
@@ -134,7 +132,6 @@ hours = "0"+str(time.tm_hour) if time.tm_hour < 10 else str(time.tm_hour)
 minutes = "0"+str(time.tm_min) if time.tm_min < 10 else str(time.tm_min)
 
 #night mode between 01 and 06 am / we not showing weather / only time
-#if time.tm_hour > 0 and time.tm_hour < 6:
 if arguments['night']:
     time_and_exit("Deep night. Exiting.")
 
@@ -147,18 +144,13 @@ else:
 #if arguments['--help']:
 #    time_and_exit("[*] We are offline. Exiting.")
 
-#if arguments['--debug']:
-#   print "[*] Debug is on"
-#    _debug_ = True
-#    logger.warning("Debug is on")
-
 if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
 #print "[**] Avalable network interfaces %s" % (if_l)
 if _debug_: logger.warning("Avalable network interfaces %s" % (if_l))
 
-if arguments['--noipshow']:
-    print "no ip given"
+if arguments['noip']:
+    print "noip given"
 
 if not _debug_:
     with canvas(device) as draw:
@@ -175,7 +167,6 @@ if not _debug_:
                 draw.text((00,30), if_a[key][0].address, font=font,fill="gray")
     sleep(2)
 
-#pwd = getcwd()
 if getcwd() != settings['wuhome']:
     chdir(settings['wuhome'])
     if _debug__: print getcwd()
@@ -191,13 +182,22 @@ except IOError as e:
     settings['cpws'] = None
     pickle.dump(settings, open(settings['fname'], "wb"))
 
+#load weather json file
 try:
     with open(settings['data_json']) as weather_file:
         parsed_json = json.load(weather_file)
-#        weather_file.close()
 except (ValueError, IOError)as e:
     logger.error("Error load JSON object in {}.".format(settings['data_json']))
     time_and_exit("[**] Error load JSON object. Exiting.")
+
+#swithch realtemp/feelslike trigger
+if arguments['realtemp']:
+    #if _debug_: print "[*] realtemp is {}, switching ".format(settings['realtsdfsdfsfemp'])
+    if _debug_: logger.warning("[*] realtemp is {}, switching ".format(settings['realtemp']))
+    settings['realtemp'] = not settings['realtemp']
+#else:
+#    print "[*] Default mode, using feelslike_c {} for temperature".format(feelslike_c)
+#    temp_c = feelslike_c
 
 #"datetime" "uv_index" "cloudcover" "humidity" "pressure" "temperature" "wind_speed" "wind_dir"
 location = parsed_json['location']['timezone_id']
@@ -295,20 +295,20 @@ logger.warning("Current temperature in %s is: %s`C  %s, feels like: %s`C." % ( l
 #print "[*] Weather updated at %s" % (last_upd)
 #log.syslog("Weather updated at "+last_upd)
 logger.warning("Weather updated at {}".format(last_upd))
+
 #dump config data
 pickle.dump(settings, open(settings['fname'], "wb"))
 
-#if wdes == u'mist' or wdes == u'fog' or wdes == u'Mist' or wdes == u'Fog':
 if u'Mist' in wdes or u'Fog' in wdes:
     img_a = 'wu_noun_fog00.png'
     print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
 
-
-if arguments['realtemp']:
-    print "[*] realtemp is on, using temp_c {} for temperaure".format(temp_c)
-else:
-    print "[*] Default mode, using feelslike_c {} for temperature".format(feelslike_c)
-    temp_c = feelslike_c
+#if arguments['realtemp']:
+#    print "[*] realtemp is on, using temp_c {} for temperaure".format(temp_c)
+#else:
+#    print "[*] Default mode, using feelslike_c {} for temperature".format(feelslike_c)
+#    temp_c = feelslike_c
+temp_c = feelslike_c if settings['realtemp'] else temp_c
 
 pic_a = Image.open('wu'+img_a)
 
