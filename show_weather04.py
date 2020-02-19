@@ -174,6 +174,7 @@ if getcwd() != settings['wuhome']:
 #load settings
 try:
     settings = pickle.load(open(settings['fname'], "rb"))
+    if _debug_: print settings
 except IOError as e:
     #print "[**] I/O error({0}) {2}: {1}".format(e.errno, e.strerror, settings['fname'])
     #print "[*] creating {0}".format(settings['fname'])
@@ -215,6 +216,7 @@ wind_speed = parsed_json['current']['wind_speed']
 wind_dir = parsed_json['current']['wind_dir']
 datetime = parsed_json['location']['localtime']
 
+#collect data and write
 try:
     with open(settings['data_array'], mode='ra') as f_da:
         csv_data = csv.DictReader(f_da)
@@ -308,7 +310,7 @@ if u'Mist' in wdes or u'Fog' in wdes:
 #else:
 #    print "[*] Default mode, using feelslike_c {} for temperature".format(feelslike_c)
 #    temp_c = feelslike_c
-temp_c = feelslike_c if settings['realtemp'] else temp_c
+temp_c = feelslike_c if not settings['realtemp'] else temp_c
 
 pic_a = Image.open('wu'+img_a)
 
