@@ -169,7 +169,7 @@ if not _debug_:
 
 if getcwd() != settings['wuhome']:
     chdir(settings['wuhome'])
-    if _debug__: print getcwd()
+    if _debug_: print getcwd()
 
 #load settings
 try:
@@ -218,33 +218,40 @@ datetime = parsed_json['location']['localtime']
 
 #collect data and write
 fnames = ['datetime','uv_index','cloudcover','humidity','pressure','temperature','wind_speed','wind_dir']
+
+if _debug_:
+#debug
+    try:
+        with open(settings['data_array'], mode='ra') as f_da:
+            csv_data = csv.DictReader(f_da,fieldnames=fnames)
+            line_count = 0
+            for row in csv_data:
+                if _debug_:
+                    print "line_count: {}".format(line_count)
+                    print type(row)
+                    print row
+
+                if line_count == 0:
+                    print 'Column names are {}'.format(row)
+                    #print f'\t{row["name"]} works in the {row["department"]} department, and was born in {row["birthday month"]}.'
+                    #print '\t{} works in the {} department, and was born in {}.'.format(row["name"],row["department"],row["birthday month"])
+                line_count += 1
+            print 'Processed {} lines.'.format(line_count)
+    except (ValueError, IOError)as e:
+        logger.error("Error read  CSV file {}, {}. Creating new".format(settings['data_array'],e))
+#NEED KEYBOARD INPUT HERE like a YES/NO etc
+        with open(settings['data_array'], mode='w') as f_da:
+            csv_new = csv.writer(f_da, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            csv_new.writerow(fnames)
+            csv_new.writerow([datetime,uv_index,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
+#write
 try:
-    with open(settings['data_array'], mode='ra') as f_da:
-        csv_data = csv.DictReader(f_da,fieldnames=fnames)
-        line_count = 0
-        for row in csv_data:
-            if _debug_:
-                print "line_count: {}".format(line_count)
-                print type(row)
-                print row
-
-            if line_count == 0:
-                print 'Column names are {}'.format(row)
-            #print f'\t{row["name"]} works in the {row["department"]} department, and was born in {row["birthday month"]}.'
-            #print '\t{} works in the {} department, and was born in {}.'.format(row["name"],row["department"],row["birthday month"])
-            line_count += 1
-        print 'Processed {} lines.'.format(line_count)
-        print 'Write data'
-
-
-        csv_data = csv.DictWriter(f_da,fieldnames=fnames)
-        csv_data.writerow([datetime,uv_index,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
-except (ValueError, IOError)as e:
-    logger.error("Error load CSV file {}, {}. Creating new".format(settings['data_array'],e))
-    with open(settings['data_array'], mode='w') as f_da:
+    with open(settings['data_array'], mode='a') as f_da:
         csv_new = csv.writer(f_da, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        csv_new.writerow(fnames)
         csv_new.writerow([datetime,uv_index,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
+except (ValueError, IOError)as e:
+    logger.error("Error write CSV file {}, {}.".format(settings['data_array'],e))
+#end data collector 
 
 if _debug_: logger.warning("Img url is {}".format(img_url))
 if _debug_: logger.warning("Is day?: {}".format(is_day))
@@ -282,13 +289,6 @@ if not path.isfile(img_a):
             #print "Looks like {} and {} diff".format(pix,item)
             newData.append(item)
 
-    #old background replace routine
-    #if item[0] == 197 and item[1] == 197 and item[2] == 197:
-    #if item[0] == pix[0] and item[1] == pix[1] and item[2] == pix[2]:
-    #if item == pix or item == pix2 or item == pix3:
-    #    newData.append((255, 255, 255, 0))
-    #else:
-    #    newData.append(item)
     pic_a.putdata(newData)
     pic_a.save("wu"+img_a, "PNG")
     #end of converting routine
