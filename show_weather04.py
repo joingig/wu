@@ -44,6 +44,8 @@ from time import localtime, sleep
 from os import getcwd, chdir, path
 from docopt import docopt
 from PIL import ImageFont, Image, ImageFilter, ImageFile
+from pymongo import * 
+
 
 logger = logging.getLogger(__file__)
 
@@ -65,7 +67,7 @@ logger.addHandler(f_handler)
 #i_handler.setFormatter(i_format)
 #logger.addHandler(i_handler)
 
-arguments = docopt(__doc__, version='0.014 with Weatherstack API')
+arguments = docopt(__doc__, version='0.015 with Weatherstack API')
 
 if arguments['--debug']:
     _debug_ = True
@@ -125,9 +127,7 @@ def isLookstheSame (a, b, dev=10):
     return False
 
 print "[*] Startup ok"
-
 time = localtime()
-
 hours = "0"+str(time.tm_hour) if time.tm_hour < 10 else str(time.tm_hour)
 minutes = "0"+str(time.tm_min) if time.tm_min < 10 else str(time.tm_min)
 
@@ -144,6 +144,22 @@ else:
 #if arguments['--help']:
 #    time_and_exit("[*] We are offline. Exiting.")
 
+
+#db prepare
+client = MongoClient('mongodb://localhost:27017/')
+db_si=client.server_info()
+if _debug_:
+    logger.warning("Database info %s " % (db_si))
+db = client['dbweather']
+
+#client.disconnect()
+if client.alive():
+    print "db status {}".format(client.admin.command('ping'))
+    print "db is alive" 
+
+#sys.exit()
+
+#get if ip routine
 if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
 #print "[**] Avalable network interfaces %s" % (if_l)
@@ -205,6 +221,11 @@ location = parsed_json['location']['timezone_id']
 last_upd = parsed_json['current']['observation_time']
 feelslike_c = parsed_json['current']["feelslike"]
 temp_c = parsed_json['current']["temperature"]
+
+if len(parsed_json['current']['weather_descriptions']) == 0:
+    logger.error("[*] look like weather_descriptions is 0, mb json damaged.exiting")
+    time_and_exit("[*] json error")
+
 wdes = parsed_json['current']['weather_descriptions'][0]
 img_url = parsed_json['current']['weather_icons'][0]
 is_day = parsed_json['current']["is_day"]
@@ -228,8 +249,8 @@ if _debug_:
             for row in csv_data:
                 if _debug_:
                     print "line_count: {}".format(line_count)
-                    print type(row)
-                    print row
+                    #print type(row)
+                    #print row
 
                 if line_count == 0:
                     print 'Column names are {}'.format(row)
@@ -253,6 +274,27 @@ except (ValueError, IOError)as e:
     logger.error("Error write CSV file {}, {}.".format(settings['data_array'],e))
 #end data collector 
 
+#db write
+t_data = db['data']
+print "t_data count() is {}".format(t_data.count())
+post_data = {
+    'datetime':datetime,
+    'uv_index':uv_index,
+    'cloudcover':cloudcover,
+    'humidity':humidity,
+    'pressure':pressure,
+    'temp_c':temp_c,
+    'wind_speed':wind_speed,
+    'wind_dir':wind_dir
+}
+
+result = t_data.insert(post_data)
+print('db post: {0}'.format(result))
+
+#end db write
+
+
+#icon processing
 if _debug_: logger.warning("Img url is {}".format(img_url))
 if _debug_: logger.warning("Is day?: {}".format(is_day))
 
@@ -311,11 +353,6 @@ if u'Mist' in wdes or u'Fog' in wdes:
     img_a = 'wu_noun_fog00.png'
     print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
 
-#if arguments['realtemp']:
-#    print "[*] realtemp is on, using temp_c {} for temperaure".format(temp_c)
-#else:
-#    print "[*] Default mode, using feelslike_c {} for temperature".format(feelslike_c)
-#    temp_c = feelslike_c
 temp_c = feelslike_c if not settings['realtemp'] else temp_c
 
 pic_a = Image.open('wu'+img_a)

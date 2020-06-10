@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export wuhome=/root/wu
-#export wuhome=/home/tazz/wu
+#export wuhome=/root/wu
+export wuhome=/home/tazz/wu
 key=$wuhome/weatherstack.key
 days=2
 
