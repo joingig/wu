@@ -1,25 +1,30 @@
 #!/bin/bash
 
-#wuhome=/root/wu
-wuhome=/home/tazz/wu
+#export wuhome=/root/wu
+export wuhome=/home/tazz/wu
+key=$wuhome/weatherstack.key
+days=2
 
-pws=$wuhome/pws_list.txt
-wukkey=`head $wuhome/wu.key`
+if [ ! -e $key ]; then
+	printf "weatherstack key not found in %s \n" $key 
+        logger "$0 weatherstack key not found in $key"
+	exit 100
+fi
+wkey=`head $key`
+printf "key : %s\n" $wkey
+/usr/bin/curl "http://api.weatherstack.com/current?access_key=$wkey&query=Moscow" -o $wuhome/weatherstack.json
 
-printf "key : %s\n" $wukkey
-#for i in ${pws[@]}; do
-for i in `cat $pws`; do
-	printf $i
-	if  echo $i | egrep -q -i "^#"
-	then printf "\n%s commented out\n" $i; continue;
-	fi
-	/usr/bin/curl http://api.wunderground.com/api/$wukkey/geolookup/conditions/hourly/q/pws:$i.json -o $wuhome/$i.json
-done
+python -c 'import sys, json, os; wuhome = os.environ.get("wuhome","/root/wu"); data_f = open(wuhome+"/weatherstack.json","r"); js_obj = json.load(data_f); print js_obj;'
 
+if [ $? -eq 0 ]; then
+    printf "No errors\n"
+    exit 0;
+fi
 
-#ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3 | head -1` > /dev/null && echo ok || echo error
-#ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error
+#we has some errors try after 5 min
+printf "Sleep 5 min\n"
+sleep 5m
 
-#function ping_gw() { ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3 | head -1` > /dev/null && return 0 || return 1} 
+/usr/bin/curl "http://api.weatherstack.com/current?access_key=$wkey&query=Moscow" -o $wuhome/weatherstack.json
+exit 0
 
-#ping_gw || (echo "no network, bye" && exit 1)
