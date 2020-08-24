@@ -118,8 +118,19 @@ if not _debug_:
     image = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(image)
     
+    font10 = ImageFont.truetype(path.join(picdir, 'Font.ttc'), 14)
     font20 = ImageFont.truetype(path.join(picdir, 'Font.ttc'), 24)
     font30 = ImageFont.truetype(path.join(picdir, 'Font.ttc'), 38)
+   
+    font10_s = font10.getsize('255.255.255.255')
+    font20_s = font20.getsize('255.255.255.255')
+    font30_s = font30.getsize('255.255.255.255')
+
+    draw.rectangle((0, 0, 200, font20_s[1]+4), fill = 0)
+    draw.rectangle((0, 200-font20_s[1]-4, 200,200), fill = 0)
+
+    #print "font30.size {}".format(font30.getsize('255.255.255.255'))
+    #sys.exit(0)
 
 #fnk for image noise fight
 def isLookstheSame (a, b, dev=10):
@@ -173,20 +184,17 @@ if arguments['noip']:
     print "noip given"
 
 if not _debug_:
-    #draw.text((0, 0), 'IP CFG', font = font20, fill=0)
-    draw.rectangle((0, 0, 200, 52), fill = 0)
-    #draw.text((8, 12), 'hello world', font = font30, fill = 255)
 
     for key in if_l:
         #print "key %s" % (key)
         if "wlan" in key.lower():
             print "[**] found wlan %s %s" % (key, if_a[key][0].address)
             #if _debug_:  logger.warning("[**] found wlan %s %s" % (key, if_a[key][0].msgaddress))
-            draw.text((0, 10), if_a[key][0].address, font = font20, fill="gray")
+            draw.text((0, 200-font10_s[1]-8), if_a[key][0].address, font = font10, fill="gray")
         if "eth" in key.lower() or "venet" in key.lower():
             print "[**] found ether %s %s" % (key, if_a[key][0].address)
             #if _debug_:  logger.warning("[**] found ether %s %s" % (key, if_a[key][0].msgaddress))
-            draw.text((0, 10), if_a[key][0].address, font = font20,fill="gray")
+            draw.text((0, 200-font10_s[1]-8), if_a[key][0].address, font = font10,fill="gray")
     #epd.display(epd.getbuffer(image.rotate(90)))
     sleep(2)
 
@@ -351,7 +359,9 @@ if not path.isfile(img_a):
 
 if not _debug_:
     #with canvas(device) as draw:
-    draw.text((0, 55), last_upd.replace('Last Updated on ', ''), font = font20, fill = 0)
+    lastUp_txt = " |Upd:" + last_upd.replace('Last Updated on ', '')
+
+    draw.text((200-font10.getsize(lastUp_txt)[0], 200-font10_s[1]-8),lastUp_txt, font = font10, fill = 255)
     #epd.display(epd.getbuffer(image.rotate(90)))
     sleep(2)
 
@@ -368,7 +378,7 @@ if u'Mist' in wdes or u'Fog' in wdes:
 
 temp_c = feelslike_c if not setti['realtemp'] else temp_c
 
-pic_a = Image.open(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp")
+pic_a = Image.open(setti['wuhome']+"/bwB"+img_a.split(".")[0]+".bmp")
 
 if not _debug_:
     #with canvas(device) as draw:

@@ -43,7 +43,7 @@ from urllib import urlretrieve
 from time import localtime, sleep
 from os import getcwd, chdir, path
 from docopt import docopt
-from PIL import ImageFont, Image, ImageFilter, ImageFile
+from PIL import ImageFont, Image, ImageFilter, ImageFile, ImageOps
 from pymongo import * 
 
 
@@ -148,7 +148,7 @@ else:
 
 #db prepare
 try:
-    client = MongoClient('mongodb://localhost:27017/')
+    client = MongoClient('mongodb://localhost:27017/',connectTimeoutMS = 3000)
     db_si=client.server_info()
     if _debug_:
         logger.warning("Database info %s " % (db_si))
@@ -336,6 +336,14 @@ if not path.isfile(img_a):
 
     pic_a.putdata(newData)
     pic_a.save(setti['wuhome']+"/wu"+img_a, "PNG")
+
+    pic_b = pic_a.convert('1')
+    pic_b.save(setti['wuhome']+"/bwB"+img_a.split(".")[0]+".bmp", "BMP")
+    
+    #prepare EPD img
+    pic_bw = pic.convert('1')
+    pic_bw.save(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp", "BMP")
+
     #end of converting routine
 
 if not _debug_:
