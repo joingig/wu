@@ -149,11 +149,6 @@ if arguments['night']:
 
 print "[*] Online" if internet_on() else time_and_exit("[*] We are offline. Exiting.")
 
-#if internet_on():
-#    print "[*] Online"
-#else:
-#    time_and_exit("[*] We are offline. Exiting.")
-
 #little buggy here docopt haz buildin -h help handler
 #if arguments['--help']:
 #    time_and_exit("[*] We are offline. Exiting.")
@@ -161,7 +156,7 @@ print "[*] Online" if internet_on() else time_and_exit("[*] We are offline. Exit
 
 #db prepare
 try:
-    client = MongoClient('mongodb://localhost:27017/',connectTimeoutMS = 3000)
+    client = MongoClient('mongodb://localhost:27017/',connectTimeoutMS = 3000, socketTimeoutMS = 3000)
     db_si=client.server_info()
     if _debug_:
         logger.warning("Database info %s " % (db_si))
@@ -249,6 +244,7 @@ pressure = parsed_json['current']['pressure']
 wind_speed = parsed_json['current']['wind_speed']
 wind_dir = parsed_json['current']['wind_dir']
 datetime = parsed_json['location']['localtime']
+weather_code = parsed_json['current']['weather_code']
 
 #collect data and write
 fnames = ['datetime','uv_index','cloudcover','humidity','pressure','temperature','wind_speed','wind_dir']
@@ -315,11 +311,23 @@ if _debug_: logger.warning("Is day?: {}".format(is_day))
 img_a = img_url.split("/")[-1]
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+#attention, webp image with png extention 
+#wsymbol_0008_clear_sky_night.png
+#00000000: 01010010 01001001 01000110 01000110 10110000 00000000  RIFF..
+#00000006: 00000000 00000000 01010111 01000101 01000010 01010000  ..WEBP
+#0000000c: 01010110 01010000 00111000 00100000 10100100 00000000  VP8 .
+#pillow need WEBP support from system libs
+#
+#from PIL import features
+#print (features.check_module('webp'))
+#True
 
 if not path.isfile(img_a):
     print "Download %s" % (img_a)
     urlretrieve(img_url, img_a)
-
+    if weather_code == 113:
+        print "[**] Using weather113.png with weather code {} ".format(weather_code)
+        #img_a = 'weather113.png'
     #start converting image 2 frenly format
     #pic = Image.open(img_a).resize((50,50))
     pic = Image.open(setti['wuhome']+"/"+img_a)
@@ -336,21 +344,28 @@ if not path.isfile(img_a):
     #print pic_a.mode
 
     newData = []
+    newDataBW = []
     for item in data:
         #fight with noise background begin
         if isLookstheSame(pix, item, 13):
             #print "Looks the same {} and {}".format(pix,item)
             newData.append((255, 255, 255, 0))
+            newDataBW.append((0,0,0))
         else:
             #print "Looks like {} and {} diff".format(pix,item)
             newData.append(item)
+            newDataBW.append((255,255,255))
 
     pic_a.putdata(newData)
     pic_a.save(setti['wuhome']+"/wu"+img_a, "PNG")
 
     pic_b = pic_a.convert('1')
     pic_b.save(setti['wuhome']+"/bwB"+img_a.split(".")[0]+".bmp", "BMP")
-    
+  
+    pic_c = Image.new("RGB", pic_a.size)
+    pic_c.putdata(newDataBW)
+    pic_c.convert('1').save(setti['wuhome']+"/c_"+img_a.split(".")[0]+".bmp", "BMP")
+
     #prepare EPD img
     pic_bw = pic.convert('1')
     pic_bw.save(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp", "BMP")
@@ -366,7 +381,6 @@ if not _debug_:
     sleep(2)
 
 logger.warning("Current temperature in %s is: %s`C  %s, feels like: %s`C." % ( location, temp_c, wdes, feelslike_c))
-#print "[*] Weather updated at %s" % (last_upd)
 logger.warning("Weather updated at {}".format(last_upd))
 
 #dump config data
@@ -378,7 +392,7 @@ if u'Mist' in wdes or u'Fog' in wdes:
 
 temp_c = feelslike_c if not setti['realtemp'] else temp_c
 
-pic_a = Image.open(setti['wuhome']+"/bwB"+img_a.split(".")[0]+".bmp")
+pic_a = Image.open(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp")
 
 if not _debug_:
     #with canvas(device) as draw:
