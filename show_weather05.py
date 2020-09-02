@@ -347,7 +347,7 @@ if not path.isfile(img_a):
     newDataBW = []
     for item in data:
         #fight with noise background begin
-        if isLookstheSame(pix, item, 13):
+        if isLookstheSame(pix, item, 14):
             #print "Looks the same {} and {}".format(pix,item)
             newData.append((255, 255, 255, 0))
             newDataBW.append((0,0,0))
@@ -386,13 +386,17 @@ logger.warning("Weather updated at {}".format(last_upd))
 #dump config data
 pickle.dump(setti, open(setti['fname'], "wb"))
 
-if u'Mist' in wdes or u'Fog' in wdes:
-    img_a = 'wu_noun_fog00.png'
-    print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
+#if u'Mist' in wdes or u'Fog' in wdes:
+#    #http://192.168.10.104:8800/c_wsymbol_0006_mist.bmp
+#    img_a = 'c_wsymbol_0006_mist.bmp'
+#    print "[**] using FOG/MIST reserved image {} because wdes == {}".format(img_a,wdes)
 
 temp_c = feelslike_c if not setti['realtemp'] else temp_c
 
-pic_a = Image.open(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp")
+#if u'Yes' in is_day or u'yes' in is_day:
+#    pic_a = Image.open(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp")
+#else:
+pic_a = Image.open(setti['wuhome']+"/c_"+img_a.split(".")[0]+".bmp")
 
 if not _debug_:
     #with canvas(device) as draw:
