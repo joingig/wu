@@ -318,8 +318,8 @@ except:
 if _debug_: logger.warning("Img url is {}".format(img_url))
 if _debug_: logger.warning("Is day?: {}".format(is_day))
 
-size_multipler = 2
-img_url = "http://openweathermap.org/img/wn/{}@{}x.png".format(img_url,size_multipler)
+size_multipler = 1
+img_url = "http://openweathermap.org/img/wn/{}@{}x.png".format(img_url,size_multipler) if size_multipler != 1 else "http://openweathermap.org/img/wn/{}.png".format(img_url)
 img_a = img_url.split("/")[-1]
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
