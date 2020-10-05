@@ -2,7 +2,7 @@
 ### application part on python
 Forecast based on [Openweathermap](https://openweathermap.org/api) API
 
-(1.54inch-e-paper)[https://www.waveshare.com/wiki/1.54inch_e-Paper_Module] driven with [DRV](https://github.com/waveshare/e-Paper)
+[1.54inch-e-paper](https://www.waveshare.com/wiki/1.54inch_e-Paper_Module) driven with [DRV](https://github.com/waveshare/e-Paper)
 
 ### setup
 
