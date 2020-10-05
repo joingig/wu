@@ -22,10 +22,7 @@ Options:
 
 setti = {'debug':False,
             'realtemp':False,
-            'cpws':"ISVIBLOV2",
-            'hourly_h':0,
             'fname':"wu.pck",
-            'pwsfile':"pws_list.txt",
             'wuhome':"/home/tazz/wu",
             'data_json':"openweather.json",
             'data_array':"dataa.txt"
@@ -155,22 +152,23 @@ print("[*] Online") if internet_on() else time_and_exit("[*] We are offline. Exi
 #    time_and_exit("[*] We are offline. Exiting.")
 
 
-#db prepare
-try:
-    client = MongoClient('mongodb://localhost:27017/',connectTimeoutMS = 3000, socketTimeoutMS = 3000)
-    db_si=client.server_info()
-    if _debug_:
-        logger.warning("Database info %s " % (db_si))
-    db = client['dbweather']
-
-#client.disconnect()
-    if client.alive():
-        status = client.admin.command('ping')
-        print(f'db status {status}')
-        print("db is alive")
-except:
-    is_db = False
-    print('[*] Database connection error.')
+##db prepare
+#try:
+#    client = MongoClient('mongodb://localhost:27017/',connectTimeoutMS = 1000, socketTimeoutMS = 1000)
+#    db_si=client.server_info()
+#    if _debug_:
+#        logger.warning("Database info %s " % (db_si))
+#    db = client['dbweather']
+#
+##client.disconnect()
+#    if client.alive():
+#        status = client.admin.command('ping')
+#        print(f'db status {status}')
+#        print("db is alive")
+#except:
+#    is_db = False
+#    #print('[**] Database connection error.')
+#    logger.warning("Database connection error")
 
 #get if ip routine
 if_l = psutil.net_if_addrs().keys()
@@ -181,15 +179,14 @@ if arguments['noip']:
     print("noip given")
 
 if not _debug_:
-
     for key in if_l:
         #print "key %s" % (key)
         if "wlan" in key.lower():
-            print(f'[**] found wlan {key} {if_a[key][0].address})')
+            print(f'[*] Wlan {key} {if_a[key][0].address}')
             #if _debug_:  logger.warning("[**] found wlan %s %s" % (key, if_a[key][0].msgaddress))
             draw.text((0, 200-font10_s[1]-8), if_a[key][0].address, font = font10, fill="gray")
         if "eth" in key.lower() or "venet" in key.lower():
-            print(f'[**] found ether {key} {if_a[key][0].address}') 
+            print(f'[*] Ether {key} {if_a[key][0].address}') 
             #if _debug_:  logger.warning("[**] found ether %s %s" % (key, if_a[key][0].msgaddress))
             draw.text((0, 200-font10_s[1]-8), if_a[key][0].address, font = font10,fill="gray")
     #epd.display(epd.getbuffer(image.rotate(90)))
@@ -219,9 +216,8 @@ except (ValueError, IOError)as e:
 
 #swithch realtemp/feelslike trigger
 if arguments['realtemp']:
-    #if _debug_: print "[*] realtemp is {}, switching ".format(settings['realtsdfsdfsfemp'])
-    if _debug_: logger.warning("[*] realtemp is {}, switching ".format(settings['realtemp']))
-    settings['realtemp'] = not settings['realtemp']
+    logger.warning("realtemp is {}, switching ".format(setti['realtemp']))
+    setti['realtemp'] = not setti['realtemp']
 #else:
 #    print "[*] Default mode, using feelslike_c {} for temperature".format(feelslike_c)
 #    temp_c = feelslike_c
@@ -234,10 +230,9 @@ if arguments['realtemp']:
 
 #"datetime" "uv_index" "cloudcover" "humidity" "pressure" "temperature" "wind_speed" "wind_dir"
 location = parsed_json['name']
-last_upd = strftime("%a, %d %b %Y %H:%M:%S +0000",localtime(parsed_json['dt'])) 
-feelslike_c = parsed_json['main']["feels_like"]
-temp_c = parsed_json['main']["temp"]
-print(parsed_json['weather'][0]['description'])
+last_upd = strftime("%a, %d %b %Y %H:%M:%S",localtime(parsed_json['dt'])) 
+feelslike_c = round(parsed_json['main']["feels_like"], 1)
+temp_c = round(parsed_json['main']["temp"], 1)
 if len(parsed_json['weather'][0]['description']) == 0:
     logger.error("[*] look like weather_description is 0, mb json damaged.exiting")
     time_and_exit("[*] json error")
@@ -293,26 +288,26 @@ except (ValueError, IOError)as e:
     logger.error("Error write CSV file {}, {}.".format(setti['data_array'],e))
 #end data collector 
 
-#db write
-try:
-    t_data = db['data']
-    print(f'[**] t_data count() is {t_data,count()}')
-    post_data = {
-        'datetime':datetime,
-        'uv_index':uv_index,
-        'cloudcover':cloudcover,
-        'humidity':humidity,
-        'pressure':pressure,
-        'temp_c':temp_c,
-        'wind_speed':wind_speed,
-        'wind_dir':wind_dir
-    }
-
-    result = t_data.insert(post_data)
-    print(f'db post: {result}')
-except:
-    print('[**] Database write error')
-#end db write
+##db write
+#try:
+#    t_data = db['data']
+#    print(f'[**] t_data count() is {t_data,count()}')
+#    post_data = {
+#        'datetime':datetime,
+#        'uv_index':uv_index,
+#        'cloudcover':cloudcover,
+#        'humidity':humidity,
+#        'pressure':pressure,
+#        'temp_c':temp_c,
+#        'wind_speed':wind_speed,
+#        'wind_dir':wind_dir
+#    }
+#    result = t_data.insert(post_data)
+#    print(f'db post: {result}')
+#except:
+#    #print('[**] Database write error')
+#    logger.warning("Database write error")
+##end db write
 
 #icon processing
 if _debug_: logger.warning("Img url is {}".format(img_url))
@@ -376,7 +371,7 @@ if not path.isfile(img_a):
 
 if not _debug_:
     #with canvas(device) as draw:
-    lastUp_txt = " |Upd:" + last_upd.replace('Last Updated on ', '')
+    lastUp_txt = "|Upd: XXXXXXX" # + last_upd
 
     draw.text((200-font10.getsize(lastUp_txt)[0], 200-font10_s[1]-8),lastUp_txt, font = font10, fill = 255)
     #epd.display(epd.getbuffer(image.rotate(90)))
