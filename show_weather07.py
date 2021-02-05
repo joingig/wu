@@ -35,6 +35,7 @@ import pickle
 import socket
 import psutil
 import logging
+import subprocess
 #from urllib2 import urlopen, URLError
 import  urllib.request
 #from urllib import urlretrieve
@@ -151,24 +152,6 @@ print("[*] Online") if internet_on() else time_and_exit("[*] We are offline. Exi
 #if arguments['--help']:
 #    time_and_exit("[*] We are offline. Exiting.")
 
-
-##db prepare
-#try:
-#    client = MongoClient('mongodb://localhost:27017/',connectTimeoutMS = 1000, socketTimeoutMS = 1000)
-#    db_si=client.server_info()
-#    if _debug_:
-#        logger.warning("Database info %s " % (db_si))
-#    db = client['dbweather']
-#
-##client.disconnect()
-#    if client.alive():
-#        status = client.admin.command('ping')
-#        print(f'db status {status}')
-#        print("db is alive")
-#except:
-#    is_db = False
-#    #print('[**] Database connection error.')
-#    logger.warning("Database connection error")
 
 #get if ip routine
 if_l = psutil.net_if_addrs().keys()
@@ -288,26 +271,6 @@ except (ValueError, IOError)as e:
     logger.error("Error write CSV file {}, {}.".format(setti['data_array'],e))
 #end data collector 
 
-##db write
-#try:
-#    t_data = db['data']
-#    print(f'[**] t_data count() is {t_data,count()}')
-#    post_data = {
-#        'datetime':datetime,
-#        'uv_index':uv_index,
-#        'cloudcover':cloudcover,
-#        'humidity':humidity,
-#        'pressure':pressure,
-#        'temp_c':temp_c,
-#        'wind_speed':wind_speed,
-#        'wind_dir':wind_dir
-#    }
-#    result = t_data.insert(post_data)
-#    print(f'db post: {result}')
-#except:
-#    #print('[**] Database write error')
-#    logger.warning("Database write error")
-##end db write
 
 #icon processing
 if _debug_: logger.warning("Img url is {}".format(img_url))
@@ -322,50 +285,15 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 if not path.isfile(img_a):
     print(f'Download {img_a}')
     urllib.request.urlretrieve(img_url, img_a)
-    
-    #start converting image 2 frenly format
-    #pic = Image.open(img_a).resize((50,50))
-    pic = Image.open(setti['wuhome']+"/"+img_a)
-    pic_a = pic.convert("RGBA")
-    data = pic_a.getdata()
+   
+    #pic = Image.open(setti['wuhome']+"/"+img_a)
+    #pic_rgb = pic.convert("RGB")
+    #r = pic_rgb.convert('L', dither=Image.NONE)
+    #r.save('foo.bmp')
 
-    #pix is a background start/etalon pixel
-    pix = data[5]
-    print(f'[**] pix data: {pix}')
-
-    #(197, 197, 197, 255)
-    #(147, 147, 147, 255)
-    #(64, 72, 145, 255)
-    #print pic_a.mode
-
-    newData = []
-    newDataBW = []
-    for item in data:
-        #fight with noise background begin
-        if isLookstheSame(pix, item, 14):
-            #print "Looks the same {} and {}".format(pix,item)
-            newData.append((255, 255, 255, 0))
-            newDataBW.append((0,0,0))
-        else:
-            #print "Looks like {} and {} diff".format(pix,item)
-            newData.append(item)
-            newDataBW.append((255,255,255))
-
-    pic_a.putdata(newData)
-    pic_a.save(setti['wuhome']+"/wu"+img_a, "PNG")
-
-    pic_b = pic_a.convert('1')
-    pic_b.save(setti['wuhome']+"/bwB"+img_a.split(".")[0]+".bmp", "BMP")
-  
-    pic_c = Image.new("RGB", pic_a.size)
-    pic_c.putdata(newDataBW)
-    pic_c.convert('1').save(setti['wuhome']+"/c_"+img_a.split(".")[0]+".bmp", "BMP")
-
-    #prepare EPD img
-    pic_bw = pic.convert('1')
-    pic_bw.save(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp", "BMP")
-
-    #end of converting routine
+    #call ImageMagic for proper image converter
+    #subprocess.check_call(['/usr/bin/convert', setti['wuhome']+"/"+img_a, '-colors 2 +dither', '-type bilevel', '-negate', setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp"])
+    subprocess.check_call(['/usr/bin/convert', setti['wuhome']+"/"+img_a, '-colors', '2', '-type', 'bilevel', '-negate', setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp"])
 
 if not _debug_:
     #with canvas(device) as draw:
@@ -383,8 +311,8 @@ pickle.dump(setti, open(setti['fname'], "wb"))
 
 temp_c = feelslike_c if not setti['realtemp'] else temp_c
 
-pic_a = Image.open(setti['wuhome']+"/bw"+img_a.split(".")[0]+".bmp")
-
+#pic_a = Image.open(setti['wuhome']+"/"+img_a.split(".")[0]+".bmp")
+pic_a = Image.open(setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp")
 
 if not _debug_:
     image.paste(pic_a, (0, 85))
