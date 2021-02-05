@@ -68,7 +68,7 @@ f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message
 f_handler.setFormatter(f_format)
 logger.addHandler(f_handler)
 
-arguments = docopt(__doc__, version='0.016 EPD with Weatherstack API')
+arguments = docopt(__doc__, version='0.07 EPD with Weatherstack API')
 
 if arguments['--debug']:
     _debug_ = True
