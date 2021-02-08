@@ -1,10 +1,11 @@
 """Usage:
-  show_weather04.py
-  show_weather04.py night
-  show_weather04.py -h | --help | --version
-  show_weather04.py noip [--debug]
-  show_weather04.py realtemp [--debug]
-  show_weather04.py --debug
+  show_weather07.py
+  show_weather07.py night
+  show_weather07.py -h | --help | --version
+  show_weather07.py noip [--debug]
+  show_weather07.py realtemp [--debug]
+  show_weather07.py --debug
+  show_weather07.py mkbmp
 
 Options:
     noip                   skip ip cfg show
@@ -13,6 +14,7 @@ Options:
   -h --help                show this help message and exit
   --version                show version and exit
   --debug                  show debug info
+    mkbmp                  recreate BMP's from PNG
 """
 
 #maximum spaghetti code below
@@ -40,7 +42,7 @@ import subprocess
 import  urllib.request
 #from urllib import urlretrieve
 from time import localtime, sleep, strftime
-from os import getcwd, chdir, path
+from os import getcwd, chdir, path, listdir
 from docopt import docopt
 from PIL import ImageFont, Image, ImageDraw, ImageFilter, ImageFile, ImageOps
 from pymongo import * 
@@ -111,9 +113,6 @@ if not _debug_:
     epd.init(epd.lut_full_update)
     #epd.Clear(0xFF)
 
-    #font_ttf30 = ImageFont.truetype(setti['wuhome']+"/luma/examples/fonts/C&C Red Alert [INET].ttf", 31)
-    #font_ttf40 = ImageFont.truetype(setti['wuhome']+"/luma/examples/fonts/Volter__28Goldfish_29.ttf", 35)
-
     image = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(image)
     
@@ -131,11 +130,44 @@ if not _debug_:
     #print "font30.size {}".format(font30.getsize('255.255.255.255'))
     #sys.exit(0)
 
-#fnk for image noise fight
-def isLookstheSame (a, b, dev=10):
-    if abs(a[0]-b[0]) < dev and abs(a[1]-b[1]) < dev and abs(a[2]-b[2]) < dev:
-        return True
-    return False
+#call ImageMagic for PNG to BMP convert
+def call_magic(pic_name, negate=True, crop=True):
+    cmd = ' '.join(['/usr/bin/convert', setti['wuhome']+'/'+pic_name, '-colors', '2', '-type', 'bilevel'])
+    if negate:
+        cmd += ' -negate'
+    if crop:
+        cmd += ' -gravity Center -crop 80x80%'
+    cmd += ' '+setti['wuhome']+'/'+path.splitext(pic_name)[0]+'.bmp'
+    #without crop
+    #subprocess.check_call(['/usr/bin/convert', setti['wuhome']+"/"+img_a, '-colors', '2', '-type', 'bilevel', '-negate', setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp"])
+    #with crop  / remove big empty image borders
+    #subprocess.check_call('[/usr/bin/convert', setti['wuhome']+'/'+img_a, '-colors', '2', '-type', 'bilevel', '-negate', '-gravity', 'Center', '-crop', '80x80%', setti['wuhome']+'/'+path.splitext(img_a)[0]+'.bmp')
+    print(f'[**] call_magic with {cmd.split()}') 
+    subprocess.check_call(cmd.split())
+    pass
+
+
+#load settings
+try:
+    setti = pickle.load(open(setti['fname'], "rb"))
+    if _debug_: print(f'[**]Settings: {setti}')
+except IOError as e:
+    logger.error("I/O error({0}) {2}: {1}".format(e.errno, e.strerror, setti['fname']))
+    logger.error("[*] creating {0}".format(setti['fname']))
+    pickle.dump(setti, open(setti['fname'], "wb"))
+
+
+if arguments['mkbmp']:
+    print('[*] mkbmp given')
+    #TODO
+    #make png's list
+    for f in listdir(setti['wuhome']):
+        if f.endswith('.png'):
+            print(f)
+            call_magic(f, True, True)
+    print('[*]Done. Exiting.')
+    exit(0)
+
 
 print("[*] Startup ok")
 time = localtime()
@@ -143,8 +175,8 @@ hours = "0"+str(time.tm_hour) if time.tm_hour < 10 else str(time.tm_hour)
 minutes = "0"+str(time.tm_min) if time.tm_min < 10 else str(time.tm_min)
 
 #night mode between 01 and 06 am / we not showing weather / only time
-if arguments['night']:
-    time_and_exit("Deep night. Exiting.")
+#if arguments['night']:
+#    time_and_exit("Deep night. Exiting.")
 
 print("[*] Online") if internet_on() else time_and_exit("[*] We are offline. Exiting.")
 
@@ -175,20 +207,13 @@ if not _debug_:
     #epd.display(epd.getbuffer(image.rotate(90)))
     sleep(2)
 
+#go home
 if getcwd() != setti['wuhome']:
     chdir(setti['wuhome'])
     if _debug_: print(getcwd())
 
-#load settings
-try:
-    setti = pickle.load(open(setti['fname'], "rb"))
-    if _debug_: print(setti)
-except IOError as e:
-    logger.error("I/O error({0}) {2}: {1}".format(e.errno, e.strerror, setti['fname']))
-    logger.error("[*] creating {0}".format(setti['fname']))
-    setti['cpws'] = None
-    pickle.dump(setti, open(setti['fname'], "wb"))
 
+#MAIN
 #load weather json file
 try:
     with open(setti['data_json']) as weather_file:
@@ -221,7 +246,7 @@ if len(parsed_json['weather'][0]['description']) == 0:
     time_and_exit("[*] json error")
 
 wdes = parsed_json['weather'][0]['description']
-img_url = parsed_json['weather'][0]['icon']
+img_icon = parsed_json['weather'][0]['icon']
 #is_day = parsed_json['current']["is_day"]
 #uv_index = parsed_json['current']['uv_index']
 cloudcover = parsed_json['clouds']['all']
@@ -232,7 +257,7 @@ wind_dir = parsed_json['wind']['deg']
 datetime = strftime("%a, %d %b %Y %H:%M:%S +0000",localtime(parsed_json['dt']))
 weather_code = parsed_json['weather'][0]['id']
 
-is_day = True if "d" in img_url else False
+is_day = True if "d" in img_icon else False
 
 #collect data and write
 fnames = ['datetime','cloudcover','humidity','pressure','temperature','wind_speed','wind_dir']
@@ -271,32 +296,23 @@ except (ValueError, IOError)as e:
     logger.error("Error write CSV file {}, {}.".format(setti['data_array'],e))
 #end data collector 
 
-
 #icon processing
-if _debug_: logger.warning("Img url is {}".format(img_url))
+if _debug_: logger.warning("Img url is {}".format(img_icon))
 if _debug_: logger.warning("Is day?: {}".format(is_day))
 
-size_multipler = 1
-img_url = "http://openweathermap.org/img/wn/{}@{}x.png".format(img_url,size_multipler) if size_multipler != 1 else "http://openweathermap.org/img/wn/{}.png".format(img_url)
+size_multipler = 2
+img_url = "http://openweathermap.org/img/wn/{}@{}x.png".format(img_icon,size_multipler) if size_multipler != 1 else "http://openweathermap.org/img/wn/{}.png".format(img_icon)
 img_a = img_url.split("/")[-1]
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 if not path.isfile(img_a):
     print(f'Download {img_a}')
     urllib.request.urlretrieve(img_url, img_a)
    
-    #pic = Image.open(setti['wuhome']+"/"+img_a)
-    #pic_rgb = pic.convert("RGB")
-    #r = pic_rgb.convert('L', dither=Image.NONE)
-    #r.save('foo.bmp')
-
     #call ImageMagic for proper image converter
-    #subprocess.check_call(['/usr/bin/convert', setti['wuhome']+"/"+img_a, '-colors 2 +dither', '-type bilevel', '-negate', setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp"])
-    subprocess.check_call(['/usr/bin/convert', setti['wuhome']+"/"+img_a, '-colors', '2', '-type', 'bilevel', '-negate', setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp"])
-
+    #TODO 03n,03d images dont need invert (-negate key)
+    #TODO 50d image bad convertion with IM 6.9.10-23 Q16 arm 20190101
+    call_magic(img_a, True, True)
 if not _debug_:
-    #with canvas(device) as draw:
     lastUp_txt = "|Upd: XXXXXXX" # + last_upd
 
     draw.text((200-font10.getsize(lastUp_txt)[0], 200-font10_s[1]-8),lastUp_txt, font = font10, fill = 255)
@@ -317,6 +333,6 @@ pic_a = Image.open(setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp")
 if not _debug_:
     image.paste(pic_a, (0, 85))
     draw.text((75, 85), str(temp_c)+u'`C', font = font30, fill = 0)
-    draw.text((75, 120), hours+":"+minutes, font = font30, fill = 0)
+    draw.text((80, 120), hours+":"+minutes, font = font30, fill = 0)
+    #image.paste(pic_a, (0, 70))
     epd.display(epd.getbuffer(image.rotate(90)))
-
