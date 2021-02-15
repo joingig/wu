@@ -149,12 +149,12 @@ def call_magic(pic_name, negate=True, crop=True):
 
 #load settings
 try:
-    setti = pickle.load(open(setti['fname'], "rb"))
+    setti = pickle.load(open(setti['wuhome']+'/'+setti['fname'], "rb"))
     if _debug_: print(f'[**]Settings: {setti}')
 except IOError as e:
     logger.error("I/O error({0}) {2}: {1}".format(e.errno, e.strerror, setti['fname']))
     logger.error("[*] creating {0}".format(setti['fname']))
-    pickle.dump(setti, open(setti['fname'], "wb"))
+    pickle.dump(setti, open(setti['wuhome']+'/'+setti['fname'], "wb"))
 
 
 if arguments['mkbmp']:
@@ -297,7 +297,7 @@ except (ValueError, IOError)as e:
 #end data collector 
 
 #icon processing
-if _debug_: logger.warning("Img url is {}".format(img_icon))
+if _debug_: logger.warning("Img url: {}".format(img_icon))
 if _debug_: logger.warning("Is day?: {}".format(is_day))
 
 size_multipler = 2
