@@ -33,19 +33,21 @@ setti = {'debug':False,
 import sys
 import csv
 import json
+import time
 import pickle
 import socket
 import psutil
 import logging
 import subprocess
-#from urllib2 import urlopen, URLError
-import  urllib.request
-#from urllib import urlretrieve
-from time import localtime, sleep, strftime
+import urllib.request
+#from time import localtime, sleep, strftime, time
 from os import getcwd, chdir, path, listdir
 from docopt import docopt
 from PIL import ImageFont, Image, ImageDraw, ImageFilter, ImageFile, ImageOps
 from pymongo import * 
+import threading
+import SDL_Pi_HDC1000
+
 
 picdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/pic')
 libdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/lib')
@@ -70,7 +72,7 @@ f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message
 f_handler.setFormatter(f_format)
 logger.addHandler(f_handler)
 
-arguments = docopt(__doc__, version='0.07 EPD with Weatherstack API')
+arguments = docopt(__doc__, version='0.08 EPD with Weatherstack API and HDC1000 sensor')
 
 if arguments['--debug']:
     _debug_ = True
@@ -140,7 +142,7 @@ def call_magic(pic_name, negate=True, crop=True):
     cmd += ' '+setti['wuhome']+'/'+path.splitext(pic_name)[0]+'.bmp'
     #without crop
     #subprocess.check_call(['/usr/bin/convert', setti['wuhome']+"/"+img_a, '-colors', '2', '-type', 'bilevel', '-negate', setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp"])
-    #with crop  / remove big empty image borders
+    #with crop  / remove big image borders
     #subprocess.check_call('[/usr/bin/convert', setti['wuhome']+'/'+img_a, '-colors', '2', '-type', 'bilevel', '-negate', '-gravity', 'Center', '-crop', '80x80%', setti['wuhome']+'/'+path.splitext(img_a)[0]+'.bmp')
     print(f'[**] call_magic with {cmd.split()}') 
     subprocess.check_call(cmd.split())
@@ -168,11 +170,52 @@ if arguments['mkbmp']:
     print('[*]Done. Exiting.')
     exit(0)
 
+#HDC1000 Sensor routine
+#if _debug_:
+print(f'[**] Init HDC1000 Sensor')
+hdc1000 = SDL_Pi_HDC1000.SDL_Pi_HDC1000()
+hdc1000.turnHeaterOn()
+hdc1000.turnHeaterOff()
+hdc1000.setTemperatureResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_TEMPERATURE_RESOLUTION_11BIT)
+hdc1000.setTemperatureResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_TEMPERATURE_RESOLUTION_14BIT)
+hdc1000.setHumidityResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_HUMIDITY_RESOLUTION_8BIT)
+hdc1000.setHumidityResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_HUMIDITY_RESOLUTION_14BIT)
+hdc1000_data = {'t':0.0,'h':0.0}
+def t_hdc1000():
+    #hdc1000_data = {'t':0.0,'h':0.0}
+    #t_start = time.strftime("%H:%M:%S")
+    print('name' + threading.currentThread().getName() + '\n')
+    t_start = time.time()
+    t_finish = t_start + 10
+    tick = 0
+    while t_start + tick < t_finish:
+        print( "-----------------")
+        print( "Temperature = %3.1f C" %
+        hdc1000.readTemperature())
+        print( "Humidity = %3.1f %%" %
+        hdc1000.readHumidity())
+        print( "-----------------")
+        time.sleep(1.0)
+        tick += 1
+        hdc1000_data['t'] +=  hdc1000.readTemperature()
+        hdc1000_data['h'] +=  hdc1000.readHumidity()
+    hdc1000_data['t'] /=  tick
+    hdc1000_data['h'] /=  tick
+    print(f"Average t {hdc1000_data['t']}, h {hdc1000_data['h']}")
+    pass
+
+hdc1000_thread  = threading.Thread(target=t_hdc1000, name='t_hdc1000')
+hdc1000_thread.start()
+#while hdc1000_thread.is_alive():
+#    pass
+#print('Finish')
+
+
 
 print("[*] Startup ok")
-time = localtime()
-hours = "0"+str(time.tm_hour) if time.tm_hour < 10 else str(time.tm_hour)
-minutes = "0"+str(time.tm_min) if time.tm_min < 10 else str(time.tm_min)
+cur_time = time.localtime()
+hours = "0"+str(cur_time.tm_hour) if cur_time.tm_hour < 10 else str(cur_time.tm_hour)
+minutes = "0"+str(cur_time.tm_min) if cur_time.tm_min < 10 else str(cur_time.tm_min)
 
 #night mode between 01 and 06 am / we not showing weather / only time
 #if arguments['night']:
@@ -205,7 +248,7 @@ if not _debug_:
             #if _debug_:  logger.warning("[**] found ether %s %s" % (key, if_a[key][0].msgaddress))
             draw.text((0, 200-font10_s[1]-8), if_a[key][0].address, font = font10,fill="gray")
     #epd.display(epd.getbuffer(image.rotate(90)))
-    sleep(2)
+    time.sleep(2)
 
 #go home
 if getcwd() != setti['wuhome']:
@@ -238,7 +281,7 @@ if arguments['realtemp']:
 
 #"datetime" "uv_index" "cloudcover" "humidity" "pressure" "temperature" "wind_speed" "wind_dir"
 location = parsed_json['name']
-last_upd = strftime("%a, %d %b %Y %H:%M:%S",localtime(parsed_json['dt'])) 
+last_upd = time.strftime("%a, %d %b %Y %H:%M:%S",time.localtime(parsed_json['dt'])) 
 feelslike_c = round(parsed_json['main']["feels_like"], 1)
 temp_c = round(parsed_json['main']["temp"], 1)
 if len(parsed_json['weather'][0]['description']) == 0:
@@ -254,7 +297,7 @@ humidity = parsed_json['main']['humidity']
 pressure = parsed_json['main']['pressure']
 wind_speed = parsed_json['wind']['speed']
 wind_dir = parsed_json['wind']['deg']
-datetime = strftime("%a, %d %b %Y %H:%M:%S +0000",localtime(parsed_json['dt']))
+datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000",time.localtime(parsed_json['dt']))
 weather_code = parsed_json['weather'][0]['id']
 
 is_day = True if "d" in img_icon else False
@@ -317,7 +360,7 @@ if not _debug_:
 
     draw.text((200-font10.getsize(lastUp_txt)[0], 200-font10_s[1]-8),lastUp_txt, font = font10, fill = 255)
     #epd.display(epd.getbuffer(image.rotate(90)))
-    sleep(2)
+    time.sleep(2)
 
 logger.warning("Current temperature in %s is: %s`C  %s, feels like: %s`C." % ( location, temp_c, wdes, feelslike_c))
 logger.warning("Weather updated at {}".format(last_upd))
@@ -330,8 +373,16 @@ temp_c = feelslike_c if not setti['realtemp'] else temp_c
 #pic_a = Image.open(setti['wuhome']+"/"+img_a.split(".")[0]+".bmp")
 pic_a = Image.open(setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp")
 
+while hdc1000_thread.is_alive():
+    pass
+print('[**]HDC1000 thread finish.')
+
+
 if not _debug_:
     image.paste(pic_a, (0, 85))
+    draw.text((5, 30), f"Indoor t: {hdc1000_data['t']:.2f}`C", font = font20, fill = 0)
+    draw.text((5, 53), f"Indoor h: {hdc1000_data['h']:.2f}%", font = font20, fill = 0)
+    
     draw.text((75, 85), str(temp_c)+u'`C', font = font30, fill = 0)
     draw.text((80, 120), hours+":"+minutes, font = font30, fill = 0)
     #image.paste(pic_a, (0, 70))
