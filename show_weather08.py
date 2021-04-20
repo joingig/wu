@@ -43,13 +43,14 @@ import urllib.request
 from os import getcwd, chdir, path, listdir
 from docopt import docopt
 from PIL import ImageFont, Image, ImageDraw, ImageFilter, ImageFile, ImageOps
-from pymongo import * 
+#from pymongo import * 
 import threading
 #sensors import
 import SDL_Pi_HDC1000
 import board
 import busio
 import adafruit_ccs811
+import mh_z19
 
 picdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/pic')
 libdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/lib')
@@ -201,14 +202,10 @@ def t_hdc1000():
 
 hdc1000_thread  = threading.Thread(target=t_hdc1000, name='t_hdc1000')
 hdc1000_thread.start()
-#while hdc1000_thread.is_alive():
-#    pass
-#print('Finish')
 
 #CCS811 Sensor routine
 #if _debug_:
 print(f'[**] Init CCS811 Sensor')
-
 ccs811_data = {'co2':0.0, 'tvoc':0.0, 't':0.0}
 i2c = busio.I2C(board.SCL, board.SDA)
 print(f'[**]i2c {i2c}')
@@ -238,6 +235,31 @@ def t_ccs811():
     pass
 ccs811_thread  = threading.Thread(target=t_ccs811, name='t_ccs811')
 ccs811_thread.start()
+
+
+#MH_Z19 Sensor routine
+#if _debug_:
+mhz19_data = {'co2':0.0, 't':0.0}
+print(f'[**] Init MH_Z19 Sensor')
+def t_mhz19():
+    print('[**]thread name ' + threading.currentThread().getName() + '\n')
+    t_start = time.time()
+    t_finish = t_start + 25 
+    tick = 0
+    while t_start + tick < t_finish:
+         mhz19 = mh_z19.read_all()
+         print(f'{time.strftime("%H:%M:%S")}, CO2: {mhz19["co2"]} PPM, Temperature: {mhz19["temperature"]}, iteration: {tick}')
+         time.sleep(2.0)
+         mhz19_data['co2'] += mhz19['co2'] 
+         mhz19_data['t'] += mhz19['temperature'] 
+         tick += 1
+ 
+    mhz19_data['co2'] /= tick
+    mhz19_data['t'] /= tick
+    print(f"[**]Average co2 {mhz19_data['co2']}, temperature {mhz19_data['t']}")
+    pass
+mhz19_thread  = threading.Thread(target=t_mhz19, name='t_mhz19')
+mhz19_thread.start()
 
 print("[*] Startup ok")
 cur_time = time.localtime()
@@ -407,10 +429,15 @@ while ccs811_thread.is_alive():
     pass
 print('[**]CCS811 thread finish.')
 
+while mhz19_thread.is_alive():
+    pass
+print('[**]MH_Z19 thread finish.')
+
+
 if not _debug_:
     image.paste(pic_a, (0, 85))
 
-    draw.text((1, 1), f"CO2 {ccs811_data['co2']}", font = font20, fill = 255)
+    draw.text((1, 1), f"co2 {ccs811_data['co2']} | { mhz19_data['co2']}", font = font20, fill = 255)
 
     draw.text((5, 30), f"Indoor t: {hdc1000_data['t']:.2f}`C", font = font20, fill = 0)
     draw.text((5, 53), f"Indoor h: {hdc1000_data['h']:.2f}%", font = font20, fill = 0)
