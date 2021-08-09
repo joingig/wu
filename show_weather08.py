@@ -439,7 +439,7 @@ if not _debug_:
 
     draw.text((1, 1), f"co2 {ccs811_data['co2']} | { mhz19_data['co2']}", font = font20, fill = 255)
 
-    draw.text((5, 30), f"Indoor t: {hdc1000_data['t']:.2f}`C", font = font20, fill = 0)
+    draw.text((5, 30), f"Indoor t: {mhz19_data['t']:.2f}`C", font = font20, fill = 0)
     draw.text((5, 53), f"Indoor h: {hdc1000_data['h']:.2f}%", font = font20, fill = 0)
     
     draw.text((75, 85), str(temp_c)+u'`C', font = font30, fill = 0)
