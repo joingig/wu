@@ -131,6 +131,7 @@ if not _debug_:
 
 
 #call ImageMagic for PNG to BMP convert
+#https://legacy.imagemagick.org/Usage/quantize/#monochrome
 def call_magic(pic_name, negate=True, crop=True, resize=False, r_size='80x80'):
     #cmd = ' '.join(['/usr/bin/convert', pic_name, '-colors', '2', '-type', 'bilevel'])
     cmd = ' '.join(['/usr/bin/convert', pic_name])
@@ -194,7 +195,6 @@ if path.isfile(home_icon):
         home_icon_bmp = ''.join([setti['wuhome'],'/imgs/',path.splitext(setti['home_icon'])[0],'.bmp'])
         #pic_h = Image.open(home_icon_bmp)
 #TODO image manipulation FIX needed
-
 line_w = 4 
 pic_h = Image.new('1', (60, 60), 255)  # 255: clear the frame
 pic_h_draw = ImageDraw.Draw(pic_h)
@@ -202,8 +202,6 @@ pic_h_draw.rounded_rectangle([(5,15), (55,55)], radius=4, width=line_w)
 pic_h_draw.rounded_rectangle([(20,25), (40,45)], radius=4, width=line_w)
 pic_h_draw.line([(1,15), (30,1)], width=line_w)
 pic_h_draw.line([(30,1), (60,15)], width=line_w)
-#print(f'Prepare home image.Exiting.')
-#sys.exit(0)
 
 
 #HDC1000 Sensor routine
