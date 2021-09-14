@@ -1,11 +1,11 @@
 """Usage:
-  show_weather07.py
-  show_weather07.py night
-  show_weather07.py -h | --help | --version
-  show_weather07.py noip [--debug]
-  show_weather07.py realtemp [--debug]
-  show_weather07.py --debug
-  show_weather07.py mkbmp
+  show_weather.py
+  show_weather.py night
+  show_weather.py -h | --help | --version
+  show_weather.py noip [--debug]
+  show_weather.py realtemp [--debug]
+  show_weather.py --debug
+  show_weather.py mkbmp
 
 Options:
     noip                   skip ip cfg show
@@ -16,6 +16,7 @@ Options:
   --debug                  show debug info
     mkbmp                  recreate BMP's from PNG
 """
+#need new cmd options review
 
 #maximum spaghetti code below
 
@@ -172,7 +173,7 @@ if arguments['mkbmp']:
     for f in listdir(setti['wuhome']):
         if f.endswith('.png'):
             print(f)
-            call_magic(f, True, True, False)
+            call_magic(f, True, True, True)
 
     for fi in listdir(setti['wuhome']+'/imgs'):
         if fi.endswith('.png'):
