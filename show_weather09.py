@@ -374,12 +374,12 @@ wdes = parsed_json['weather'][0]['description']
 img_icon = parsed_json['weather'][0]['icon']
 #is_day = parsed_json['current']["is_day"]
 #uv_index = parsed_json['current']['uv_index']
-cloudcover = parsed_json['clouds']['all']
+cloud_cover = parsed_json['clouds']['all']
 humidity = parsed_json['main']['humidity']
 pressure = parsed_json['main']['pressure']
 wind_speed = parsed_json['wind']['speed']
 wind_dir = parsed_json['wind']['deg']
-datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000",time.localtime(parsed_json['dt']))
+date_time = time.strftime('%a %d %b %Y %H:%M:%S',time.localtime())
 weather_code = parsed_json['weather'][0]['id']
 
 is_day = True if "d" in img_icon else False
@@ -409,12 +409,12 @@ if _debug_:
         with open(setti['data_array'], mode='w') as f_da:
             csv_new = csv.writer(f_da, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_new.writerow(fnames)
-            csv_new.writerow([datetime,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
+            csv_new.writerow([date_time,cloud_cover,humidity,pressure,temp_c,wind_speed,wind_dir])
 #write
 try:
     with open(setti['data_array'], mode='a') as f_da:
         csv_new = csv.writer(f_da, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        csv_new.writerow([datetime,cloudcover,humidity,pressure,temp_c,wind_speed,wind_dir])
+        csv_new.writerow([date_time,cloud_cover,humidity,pressure,temp_c,wind_speed,wind_dir])
 except (ValueError, IOError)as e:
     logger.error("Error write CSV file {}, {}.".format(setti['data_array'],e))
 #end data collector 
