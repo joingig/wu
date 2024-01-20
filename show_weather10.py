@@ -210,7 +210,7 @@ pic_h_draw.line([(30,1), (60,15)], width=line_w)
 #hdc1000_data = {'t':0.0,'h':0.0}
 #def t_hdc1000():
 #    t_name = threading.currentThread().getName()
-#    print('f[**]Thread name {t_name}')
+#    print(f'[**]Thread name {t_name}')
 #    t_start = time.time()
 #    t_finish = t_start + 10
 #    tick = 0
@@ -246,7 +246,7 @@ pic_h_draw.line([(30,1), (60,15)], width=line_w)
 #
 #def t_ccs811():
 #    t_name = threading.currentThread().getName()
-#    print('f[**]Thread name {t_name}')
+#    print(f'[**]Thread name {t_name}')
 #    t_start = time.time()
 #    t_finish = t_start + 10 
 #    tick = 0
@@ -270,10 +270,10 @@ pic_h_draw.line([(30,1), (60,15)], width=line_w)
 #MH_Z19 Sensor routine (CO2, PPM, Temperature)
 #if _debug_:
 mhz19_data = {'co2':0.0, 't':0.0}
-print(f'[**] Init MH_Z19 Sensor')
+print(f'[*] Init MH_Z19 Sensor')
 def t_mhz19():
     t_name = threading.currentThread().getName()
-    print('f[**]Thread name {t_name}')
+    print(f'[**]Thread name {t_name}')
     t_start = time.time()
     t_finish = t_start + 25 
     tick = 0
@@ -289,15 +289,16 @@ def t_mhz19():
     mhz19_data['t'] /= tick
     print(f"[**]Average co2 {mhz19_data['co2']}, temperature {mhz19_data['t']}")
     pass
+
 mhz19_thread  = threading.Thread(target=t_mhz19, name='t_mhz19')
 mhz19_thread.start()
 
-print(f"[*] Startup ok")
+print(f'[*] Startup ok')
 cur_time = time.localtime()
-hours = f"0{cur_time.tm_hour}" if cur_time.tm_hour < 10 else str(cur_time.tm_hour)
-minutes = f"0{cur_time.tm_min}" if cur_time.tm_min < 10 else str(cur_time.tm_min)
+hours = f'0{cur_time.tm_hour}' if cur_time.tm_hour < 10 else str(cur_time.tm_hour)
+minutes = f'0{cur_time.tm_min}' if cur_time.tm_min < 10 else str(cur_time.tm_min)
 
-print("[*] Online") if internet_on() else time_and_exit("[*] We are offline. Exiting.")
+print('[*] Online') if internet_on() else time_and_exit("[*] We are offline. Exiting.")
 
 #get ip 
 if_l = psutil.net_if_addrs().keys()
