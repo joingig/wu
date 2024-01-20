@@ -42,10 +42,8 @@ import urllib.request
 from os import getcwd, chdir, path, listdir
 from docopt import docopt
 from PIL import ImageFont, Image, ImageDraw, ImageFilter, ImageFile, ImageOps
-#from pymongo import * 
 import threading
-#sensors import
-import SDL_Pi_HDC1000
+#import SDL_Pi_HDC1000
 import board
 import busio
 import adafruit_ccs811
@@ -182,11 +180,6 @@ if arguments['mkbmp']:
     print('[*]Done. Exiting.')
     sys.exit(0)
 
-
-#########################################################################################
-
-
-#home_icon = setti['wuhome'] + '/imgs/' + setti['home_icon']
 home_icon = ''.join([setti['wuhome'],'/imgs/',setti['home_icon']])
 print(f'Home icon: {home_icon}')
 if path.isfile(home_icon):
@@ -194,7 +187,7 @@ if path.isfile(home_icon):
         print(f'[**] Convert:{home_icon} to 50x50 BMP')
         call_magic(home_icon, False, False, True, "50x50")
         home_icon_bmp = ''.join([setti['wuhome'],'/imgs/',path.splitext(setti['home_icon'])[0],'.bmp'])
-        #pic_h = Image.open(home_icon_bmp)
+
 #TODO image manipulation FIX needed
 line_w = 4 
 pic_h = Image.new('1', (60, 60), 255)  # 255: clear the frame
@@ -204,88 +197,77 @@ pic_h_draw.rounded_rectangle([(20,25), (40,45)], radius=4, width=line_w)
 pic_h_draw.line([(1,15), (30,1)], width=line_w)
 pic_h_draw.line([(30,1), (60,15)], width=line_w)
 
+##HDC1000 Sensor routine (Temperature, Humidity)
+##if _debug_:
+#print(f'[**] Init HDC1000 Sensor')
+#hdc1000 = SDL_Pi_HDC1000.SDL_Pi_HDC1000()
+#hdc1000.turnHeaterOn()
+#hdc1000.turnHeaterOff()
+#hdc1000.setTemperatureResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_TEMPERATURE_RESOLUTION_11BIT)
+#hdc1000.setTemperatureResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_TEMPERATURE_RESOLUTION_14BIT)
+#hdc1000.setHumidityResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_HUMIDITY_RESOLUTION_8BIT)
+#hdc1000.setHumidityResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_HUMIDITY_RESOLUTION_14BIT)
+#hdc1000_data = {'t':0.0,'h':0.0}
+#def t_hdc1000():
+#    t_name = threading.currentThread().getName()
+#    print('f[**]Thread name {t_name}')
+#    t_start = time.time()
+#    t_finish = t_start + 10
+#    tick = 0
+#    while t_start + tick < t_finish:
+#        #print( "-----------------")
+#        #print( "Temperature = %3.1f C" % hdc1000.readTemperature())
+#        #print( "Humidity = %3.1f %%" % hdc1000.readHumidity())
+#        #print( "-----------------")
+#        print(f'{time.strftime("%H:%M:%S")} Humidity: {hdc1000.readHumidity()}, Temperature: {hdc1000.readTemperature()}, iteration: {tick}')
+#        time.sleep(1.0)
+#        tick += 1
+#        hdc1000_data['t'] +=  hdc1000.readTemperature()
+#        hdc1000_data['h'] +=  hdc1000.readHumidity()
+#    hdc1000_data['t'] /=  tick
+#    hdc1000_data['h'] /=  tick
+#    print(f"[**]Average t {hdc1000_data['t']}, h {hdc1000_data['h']}")
+#    pass
+#
+#hdc1000_thread  = threading.Thread(target=t_hdc1000, name='t_hdc1000')
+#hdc1000_thread.start()
 
-#Ali HDC1000\CCS811 Sensor 
-#_____
-#  VCC --white---- RPI 17 / 3.3V
-#  GND --gray----- RPI 25 / Ground
-#  SCL --magenta-- RPI 03 / SCL
-#  SDA --blue----- RPI 02 / SDA
-#  WAK --green---- RPI 39 / Ground
-#____
+##CCS811 Sensor routine (eCO2, TVOC, Temperature)
+##if _debug_:
+#print(f'[**] Init CCS811 Sensor')
+#ccs811_data = {'co2':0.0, 'tvoc':0.0, 't':0.0}
+#i2c = busio.I2C(board.SCL, board.SDA)
+#print(f'[**]i2c {i2c}')
+#ccs811 = adafruit_ccs811.CCS811(i2c)
+#
+## Wait for the sensor to be ready
+#while not ccs811.data_ready:
+#    pass
+#
+#def t_ccs811():
+#    t_name = threading.currentThread().getName()
+#    print('f[**]Thread name {t_name}')
+#    t_start = time.time()
+#    t_finish = t_start + 10 
+#    tick = 0
+#    while t_start + tick < t_finish:
+#        #print("{} CO2: {} PPM, TVOC: {} PPB, Temp: {}, iteration {}".format(time.strftime('%H:%M:%S'), ccs811.eco2, ccs811.tvoc, ccs811.temperature, tick))
+#        print(f'{time.strftime("%H:%M:%S")} CO2: {ccs811.eco2} PPM, TVOC: {ccs811.tvoc}, Temperature: {ccs811.temperature}, iteration: {tick}')
+#        time.sleep(5.0)
+#        ccs811_data['co2'] += ccs811.eco2
+#        ccs811_data['tvoc'] += ccs811.tvoc
+#        ccs811_data['t'] += ccs811.temperature
+#        tick += 1 
+#   
+#    ccs811_data['co2'] /= tick 
+#    ccs811_data['tvoc'] /= tick 
+#    ccs811_data['t'] /= tick 
+#    print(f"[**]Average CO2 {ccs811_data['co2']}, TVOC {ccs811_data['tvoc']}, Temperature {ccs811_data['t']}")
+#    pass
+#ccs811_thread  = threading.Thread(target=t_ccs811, name='t_ccs811')
+#ccs811_thread.start()
 
-#HDC1000 Sensor routine
-#if _debug_:
-print(f'[**] Init HDC1000 Sensor')
-hdc1000 = SDL_Pi_HDC1000.SDL_Pi_HDC1000()
-hdc1000.turnHeaterOn()
-hdc1000.turnHeaterOff()
-hdc1000.setTemperatureResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_TEMPERATURE_RESOLUTION_11BIT)
-hdc1000.setTemperatureResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_TEMPERATURE_RESOLUTION_14BIT)
-hdc1000.setHumidityResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_HUMIDITY_RESOLUTION_8BIT)
-hdc1000.setHumidityResolution(SDL_Pi_HDC1000.HDC1000_CONFIG_HUMIDITY_RESOLUTION_14BIT)
-hdc1000_data = {'t':0.0,'h':0.0}
-def t_hdc1000():
-    t_name = threading.currentThread().getName()
-    print('f[**]Thread name {t_name}')
-    t_start = time.time()
-    t_finish = t_start + 10
-    tick = 0
-    while t_start + tick < t_finish:
-        #print( "-----------------")
-        #print( "Temperature = %3.1f C" % hdc1000.readTemperature())
-        #print( "Humidity = %3.1f %%" % hdc1000.readHumidity())
-        #print( "-----------------")
-        print(f'{time.strftime("%H:%M:%S")} Humidity: {hdc1000.readHumidity()}, Temperature: {hdc1000.readTemperature()}, iteration: {tick}')
-        time.sleep(1.0)
-        tick += 1
-        hdc1000_data['t'] +=  hdc1000.readTemperature()
-        hdc1000_data['h'] +=  hdc1000.readHumidity()
-    hdc1000_data['t'] /=  tick
-    hdc1000_data['h'] /=  tick
-    print(f"[**]Average t {hdc1000_data['t']}, h {hdc1000_data['h']}")
-    pass
-
-hdc1000_thread  = threading.Thread(target=t_hdc1000, name='t_hdc1000')
-hdc1000_thread.start()
-
-#CCS811 Sensor routine
-#if _debug_:
-print(f'[**] Init CCS811 Sensor')
-ccs811_data = {'co2':0.0, 'tvoc':0.0, 't':0.0}
-i2c = busio.I2C(board.SCL, board.SDA)
-print(f'[**]i2c {i2c}')
-ccs811 = adafruit_ccs811.CCS811(i2c)
-
-# Wait for the sensor to be ready
-while not ccs811.data_ready:
-    pass
-
-def t_ccs811():
-    t_name = threading.currentThread().getName()
-    print('f[**]Thread name {t_name}')
-    t_start = time.time()
-    t_finish = t_start + 10 
-    tick = 0
-    while t_start + tick < t_finish:
-        #print("{} CO2: {} PPM, TVOC: {} PPB, Temp: {}, iteration {}".format(time.strftime('%H:%M:%S'), ccs811.eco2, ccs811.tvoc, ccs811.temperature, tick))
-        print(f'{time.strftime("%H:%M:%S")} CO2: {ccs811.eco2} PPM, TVOC: {ccs811.tvoc}, Temperature: {ccs811.temperature}, iteration: {tick}')
-        time.sleep(5.0)
-        ccs811_data['co2'] += ccs811.eco2
-        ccs811_data['tvoc'] += ccs811.tvoc
-        ccs811_data['t'] += ccs811.temperature
-        tick += 1 
-   
-    ccs811_data['co2'] /= tick 
-    ccs811_data['tvoc'] /= tick 
-    ccs811_data['t'] /= tick 
-    print(f"[**]Average CO2 {ccs811_data['co2']}, TVOC {ccs811_data['tvoc']}, Temperature {ccs811_data['t']}")
-    pass
-ccs811_thread  = threading.Thread(target=t_ccs811, name='t_ccs811')
-ccs811_thread.start()
-
-
-#MH_Z19 Sensor routine
+#MH_Z19 Sensor routine (CO2, PPM, Temperature)
 #if _debug_:
 mhz19_data = {'co2':0.0, 't':0.0}
 print(f'[**] Init MH_Z19 Sensor')
@@ -310,21 +292,17 @@ def t_mhz19():
 mhz19_thread  = threading.Thread(target=t_mhz19, name='t_mhz19')
 mhz19_thread.start()
 
-print("[*] Startup ok")
+print(f"[*] Startup ok")
 cur_time = time.localtime()
-hours = "0"+str(cur_time.tm_hour) if cur_time.tm_hour < 10 else str(cur_time.tm_hour)
-minutes = "0"+str(cur_time.tm_min) if cur_time.tm_min < 10 else str(cur_time.tm_min)
-
-#night mode between 01 and 06 am / we not showing weather / only time
-#if arguments['night']:
-#    time_and_exit("Deep night. Exiting.")
+hours = f"0{cur_time.tm_hour}" if cur_time.tm_hour < 10 else str(cur_time.tm_hour)
+minutes = f"0{cur_time.tm_min}" if cur_time.tm_min < 10 else str(cur_time.tm_min)
 
 print("[*] Online") if internet_on() else time_and_exit("[*] We are offline. Exiting.")
 
-#get if ip routine
+#get ip 
 if_l = psutil.net_if_addrs().keys()
 if_a = psutil.net_if_addrs()
-if _debug_: logger.warning("Avalable network interfaces %s" % (if_l))
+if _debug_: logger.warning(f"Avalable network interfaces {if_l}")
 
 if arguments['noip']:
     print("noip given")
@@ -340,7 +318,6 @@ if not _debug_:
             print(f'[*] Ether {key} {if_a[key][0].address}') 
             #if _debug_:  logger.warning("[**] found ether %s %s" % (key, if_a[key][0].msgaddress))
             draw.text((0, 200-font10_s[1]-8), if_a[key][0].address, font = font10,fill="gray")
-    #epd.display(epd.getbuffer(image.rotate(90)))
     time.sleep(2)
 
 #go home
@@ -354,7 +331,7 @@ try:
     with open(setti['data_json']) as weather_file:
         parsed_json = json.load(weather_file)
 except (ValueError, IOError)as e:
-    logger.error("Error load JSON object in {}.".format(settings['data_json']))
+    logger.error(f"Error load JSON object in {settings['data_json']}")
     time_and_exit("[**] Error load JSON object. Exiting.")
 
 #swithch realtemp/feelslike trigger
@@ -390,7 +367,6 @@ wind_speed = parsed_json['wind']['speed']
 wind_dir = parsed_json['wind']['deg']
 date_time = time.strftime('%a %d %b %Y %H:%M:%S',time.localtime())
 weather_code = parsed_json['weather'][0]['id']
-
 is_day = True if "d" in img_icon else False
 
 #collect data and write
@@ -465,13 +441,13 @@ temp_c = feelslike_c if not setti['realtemp'] else temp_c
 
 pic_a = Image.open(setti['wuhome']+"/"+path.splitext(img_a)[0]+".bmp")
 
-while hdc1000_thread.is_alive():
-    pass
-print('[**]HDC1000 thread finish.')
+#while hdc1000_thread.is_alive():
+#    pass
+#print('[**]HDC1000 thread finish.')
 
-while ccs811_thread.is_alive():
-    pass
-print('[**]CCS811 thread finish.')
+#while ccs811_thread.is_alive():
+#    pass
+#print('[**]CCS811 thread finish.')
 
 while mhz19_thread.is_alive():
     pass
@@ -483,7 +459,8 @@ if not _debug_:
     draw.text((1, 1), f"co2 {mhz19_data['co2']}", font = font20, fill = 255)
 
     draw.text((70, 30), f"t: {mhz19_data['t']:.2f}`C", font = font20, fill = 0)
-    draw.text((70, 53), f"h: {hdc1000_data['h']:.2f}%", font = font20, fill = 0)
+#    draw.text((70, 53), f"h: {hdc1000_data['h']:.2f}%", font = font20, fill = 0)
+    draw.text((70, 53), f"h: not ready%", font = font20, fill = 0)
     image.paste(pic_h, (5, 30)) 
     draw.text((75, 85), str(temp_c)+u'`C', font = font30, fill = 0)
     draw.text((80, 120), hours+":"+minutes, font = font30, fill = 0)
