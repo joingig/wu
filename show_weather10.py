@@ -44,10 +44,11 @@ from docopt import docopt
 from PIL import ImageFont, Image, ImageDraw, ImageFilter, ImageFile, ImageOps
 import threading
 #import SDL_Pi_HDC1000
-import board
-import busio
-import adafruit_ccs811
+#import board
+#import busio
+#import adafruit_ccs811
 import mh_z19
+import smbus2
 
 picdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/pic')
 libdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/lib')
@@ -270,7 +271,6 @@ pic_h_draw.line([(30,1), (60,15)], width=line_w)
 #MH_Z19 Sensor routine (CO2, PPM, Temperature)
 #if _debug_:
 mhz19_data = {'co2':0.0, 't':0.0}
-print(f'[*] Init MH_Z19 Sensor')
 def t_mhz19():
     t_name = threading.currentThread().getName()
     print(f'[**]Thread name {t_name}')
@@ -290,8 +290,80 @@ def t_mhz19():
     print(f"[**]Average co2 {mhz19_data['co2']}, temperature {mhz19_data['t']}")
     pass
 
+print(f'[*] Init MH_Z19 Sensor')
 mhz19_thread  = threading.Thread(target=t_mhz19, name='t_mhz19')
 mhz19_thread.start()
+
+#SHT3s sensor routine, humidity and temp 
+sht3x_data = {'h':0.0, 't':0.0}
+SHT3x_ADDR              = 0x44
+SHT3x_SS                = 0x2c
+SHT3x_HIGH              = 0x06
+SHT3x_READ              = 0x00
+#bus = smbus.SMBus(1)
+#time.sleep(2)
+#bus.write_i2c_block_data(SHT3x_ADDR,SHT3x_SS,[0x06])
+#time.sleep(1)
+def t_sht3x():
+    #bus = smbus.SMBus(1)
+    #time.sleep(1)
+
+    #SHT3x_ADDR              = 0x44
+    #SHT3x_SS                = 0x2c
+    #SHT3x_HIGH              = 0x06
+    #SHT3x_READ              = 0x00
+
+    with smbus2.SMBus(1) as bus:
+        time.sleep(1.0)
+        # MS to SL
+        bus.write_i2c_block_data(SHT3x_ADDR,SHT3x_SS,[0x06])
+
+        # MS to SL
+        #bus.write_i2c_block_data(SHT3x_ADDR,SHT3x_SS,[0x06])
+        time.sleep(0.2)
+
+        t_start = time.time()
+        t_finish = t_start + 25
+        tick = 0
+        while t_start + tick < t_finish:
+            data = bus.read_i2c_block_data(SHT3x_ADDR,SHT3x_READ,6)
+            t_data = data[0] << 8 | data[1]
+            h_data = data[3] << 8 | data[4]
+            sht3x_data['h'] += 100.0*float(h_data)/65535.0
+            sht3x_data['t'] += -45.0 + 175.0*float(t_data)/65535.0
+            #mhz19 = mh_z19.read_all()
+            #print(f'{time.strftime("%H:%M:%S")} H: {mhz19["co2"]} PPM, Temperature: {mhz19["temperature"]}, iteration: {tick}')
+            #time.sleep(2.0)
+            #mhz19_data['co2'] += mhz19['co2']
+            #mhz19_data['t'] += mhz19['temperature']
+            time.sleep(2.0)
+            tick += 1
+    
+    sht3x_data['h'] /= tick
+    sht3x_data['t'] /= tick
+    print(f"[**]Average h {sht3x_data['h']}, temperature {sht3x_data['t']}")
+
+    # Read out data
+    #data = bus.read_i2c_block_data(SHT3x_ADDR,SHT3x_READ,6)
+
+    # Devide data into counts Temperature
+    #t_data = data[0] << 8 | data[1]
+
+    # Devide data into counts Humidity
+    #h_data = data[3] << 8 | data[4]
+
+    # Convert counts to Temperature/Humidity
+    #Hum = 100.0*float(h_data)/65535.0
+    #Tem = -45.0 + 175.0*float(t_data)/65535.0
+
+    # Print Temperature and Humdity
+    #print("Temp: %0.2f C  H: %0.2f % ") % (Temperature,Humidity)
+    #print(f"Temp: {Tem} C  H: {Hum}")
+    pass
+
+print(f'[*] Init SHT3x Sensor')
+sht3x_thread  = threading.Thread(target=t_sht3x, name='t_sht3x')
+sht3x_thread.start()
 
 print(f'[*] Startup ok')
 cur_time = time.localtime()
