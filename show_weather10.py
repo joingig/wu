@@ -49,7 +49,7 @@ import threading
 #import adafruit_ccs811
 #import mh_z19
 #import smbus2
-from sensors import t_mhz19, sht3x, t_sht3x
+from sensors import t_mhz19, sht3x, t_sht3x, mhz19_data
 
 picdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/pic')
 libdir = path.join(path.dirname(path.realpath(__file__)),'e-Paper/RaspberryPi&JetsonNano/python/lib')
@@ -362,8 +362,8 @@ print('[**]MH_Z19 thread finish.')
 if not _debug_:
     image.paste(pic_a, (0, 85))
 
-    draw.text((1, 1), f"co2 {mhz19_g['co2']}", font = font20, fill = 255)
-    draw.text((70, 30), f"t: {mhz19_g['t']:.2f}`C", font = font20, fill = 0)
+    draw.text((1, 1), f"co2 {mhz19_data['co2']}", font = font20, fill = 255)
+    draw.text((70, 30), f"t: {mhz19_data['t']:.2f}`C", font = font20, fill = 0)
     draw.text((70, 53), f'h: {sht3x_g[4][0:5]}%', font = font20, fill = 0)
 #    draw.text((70, 53), f"h: not ready%", font = font20, fill = 0)
     image.paste(pic_h, (5, 30)) 

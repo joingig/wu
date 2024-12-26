@@ -72,9 +72,10 @@ import smbus2
 
 #MH_Z19 Sensor routine (CO2, PPM, Temperature)
 #if _debug_:
+mhz19_data = {'co2':0.0, 't':0.0}
 def t_mhz19():
     global mhz19_g
-    mhz19_data = {'co2':0.0, 't':0.0}
+    #mhz19_data = {'co2':0.0, 't':0.0}
     t_name = threading.currentThread().getName()
     print(f'[**]Thread name {t_name}')
     t_start = time.time()
