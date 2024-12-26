@@ -258,8 +258,8 @@ try:
     with open(setti['data_json']) as weather_file:
         parsed_json = json.load(weather_file)
 except (ValueError, IOError)as e:
-    logger.error(f"Error load JSON object in {settings['data_json']}")
-    time_and_exit("[**] Error load JSON object. Exiting.")
+    logger.error(f"Error load JSON object in {setti['data_json']}")
+    time_and_exit('[**] Error load JSON object. Exiting.')
 
 #root@rpiz:/home/tazz/wu# jq ."sys"."country" < openweather.json  | more
 #"RU"

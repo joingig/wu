@@ -1,7 +1,8 @@
-import subprocess
+from subprocess import check_output
+from sys import executable
+from os import path
 import threading
 import time
-import sys
 import mh_z19
 import smbus2
 
@@ -97,13 +98,11 @@ def t_mhz19():
 
 #SHT3x workarround
 def sht3x() -> []:
-    #global mhz19_g
-    cmd = ' '.join([sys.executable, './sht3x.py'])
-    out = subprocess.check_output(cmd.split())
+    sht3x_py = path.join(path.dirname(path.realpath(__file__)), 'sht3x.py')
+    cmd = ' '.join([executable, sht3x_py])
+    out = check_output(cmd.split())
     out_sp = out.decode().split()
     print('[**]', out.decode().split())
-    #mhz19_g['t'] = out_sp[1]
-    #mhz19_g['h'] = out_sp[5] 
     return out_sp 
 
 #SHT3s sensor routine, humidity and temp
