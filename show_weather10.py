@@ -41,7 +41,7 @@ import subprocess
 import urllib.request
 from os import getcwd, chdir, path, listdir
 from docopt import docopt
-from PIL import ImageFont, Image, ImageDraw, ImageFilter, ImageFile, ImageOps
+from PIL import ImageFont, Image, ImageDraw
 import threading
 #import SDL_Pi_HDC1000
 #import board
