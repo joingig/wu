@@ -73,7 +73,7 @@ f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message
 f_handler.setFormatter(f_format)
 logger.addHandler(f_handler)
 
-arguments = docopt(__doc__, version='0.9 EPD with Weatherstack API and HDC1000 CCS811 sensors')
+arguments = docopt(__doc__, version='0.11 EPD with Openweather API and MH_Z19 + SHT3x sensors')
 
 if arguments['--debug']:
     _debug_ = True
